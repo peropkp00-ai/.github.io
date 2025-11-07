@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="es" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NAVALEK SPA - Proyectos de Ingeniería Eléctrica</title>
+    
+    <!-- Carga de Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Carga de la fuente 'Inter' -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700;900&display=swap" rel="stylesheet">
+    
+    <!-- Carga de Three.js (Motor 3D) -->
+    <script async src="https://unpkg.com/es-module-shims@1.6.3/dist/es-module-shims.js"></script>
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://cdn.jsdelivr.net/npm/three@0.140.0/build/three.module.js"
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            /* Azul muy oscuro del PDF */
+            background-color: #0d1a3f; 
+            color: #f3f4f6;
+        }
+        
+        #webgl-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            z-index: 0;
+        }
+
+        .scroll-content {
+            position: relative;
+            z-index: 10;
+            color: white;
+            /* Deja espacio para el hero */
+            padding-top: 100vh;
+        }
+        
+        .hero-section {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            position: relative;
+            z-index: 5;
+            padding: 1rem;
+        }
+
+        /* Estilo Glassmorfismo adaptado a los colores del PDF */
+        .glass-card {
+            /* Azul oscuro semitransparente */
+            background: rgba(13, 26, 63, 0.6);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            /* Borde sutil color púrpura */
+            border: 1px solid rgba(168, 126, 255, 0.1);
+        }
+
+        /* Sección de scroll horizontal */
+        .horizontal-scroll-section {
+            height: 70vh;
+            display: flex;
+            align-items: stretch; /* Asegura que las tarjetas tengan la misma altura */
+            overflow-x: auto;
+            padding: 2rem 0;
+            /* Efecto de "parada" en cada tarjeta */
+            scroll-snap-type: x mandatory;
+        }
+        
+        .horizontal-scroll-section > div {
+            /* Incrementamos el ancho para el texto detallado */
+            flex: 0 0 350px; 
+            margin-left: 2rem;
+            scroll-snap-align: center;
+            /* Para que el div h-full de la tarjeta funcione */
+            display: flex; 
+        }
+        /* Ocultar barra de scroll */
+        .horizontal-scroll-section::-webkit-scrollbar { display: none; }
+        .horizontal-scroll-section { -ms-overflow-style: none; scrollbar-width: none; }
+
+        /* Estilo Hexágono (del PDF P.30) para el equipo */
+        .hexagon-clip {
+            clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <!-- El fondo 3D -->
+    <canvas id="webgl-canvas"></canvas>
+
+    <!-- Hero de Portada (P.1) -->
+    <header class="hero-section">
+        <h1 class="text-6xl md:text-8xl font-black uppercase tracking-tighter">
+            NAVALEK SPA
+        </h1>
+        <p class="text-xl md:text-2xl text-gray-300 mt-4 max-w-2xl">
+            Proyectos de Ingeniería y Asesorías Eléctricas
+        </p>
+        <p class="text-lg text-purple-300 mt-20 animate-pulse">
+            Haz scroll para activar el flujo
+        </p>
+    </header>
+
+    <!-- Contenido principal -->
+    <main class="scroll-content">
+        
+        <!-- Scrollytelling: Quienes Somos, Misión, Visión (P.3-5) -->
+        <section class="h-screen flex items-center justify-center p-8 sticky top-0 -mt-[100vh]">
+            <div class="glass-card p-10 md:p-16 rounded-2xl max-w-3xl mx-auto shadow-2xl transition-opacity duration-500" data-scrolly="card-1">
+                <span class="text-sm font-bold text-purple-300">Quienes Somos (P.3)</span>
+                <p class="text-xl md:text-2xl text-gray-200 leading-relaxed mt-4">
+                    Somos un equipo de profesionales con una gran pasión por el servicio a nuestros clientes y a nuestra empresa. Contamos con una amplia experiencia en proyectos de ingeniería y asesorías eléctricas, estamos comprometidos con entregar un servicio de calidad y personalizado.
+                </p>
+            </div>
+        </section>
+        <section class="h-screen flex items-center justify-center p-8 sticky top-0 -mt-[100vh]">
+            <div class="glass-card p-10 md:p-16 rounded-2xl max-w-3xl mx-auto shadow-2xl transition-opacity duration-500" data-scrolly="card-2">
+                <span class="text-sm font-bold text-cyan-300">Nuestra Misión (P.4)</span>
+                <p class="text-xl md:text-2xl text-gray-200 leading-relaxed mt-4">
+                    Ofrecer soluciones integrales de ingeniería eléctrica y asesorías, que permitan a nuestros clientes mejorar la seguridad en sus instalaciones y con eficiencia energética, optimizando sus costos y contribuir al desarrollo sostenible.
+                </p>
+            </div>
+        </section>
+        <section class="h-screen flex items-center justify-center p-8 sticky top-0 -mt-[100vh]">
+             <div class="glass-card p-10 md:p-16 rounded-2xl max-w-3xl mx-auto shadow-2xl transition-opacity duration-500" data-scrolly="card-3">
+                <span class="text-sm font-bold text-purple-300">Nuestra Visión (P.5)</span>
+                <p class="text-xl md:text-2xl text-gray-200 leading-relaxed mt-4">
+                    Ser el socio estratégico asegurando un correcto funcionamiento de las instalaciones eléctricas en el tiempo, generando que las empresas y organizaciones alcancen objetivos de sostenibilidad y eficiencia energética a través de soluciones innovadoras en proyecto de ingeniería y asesorías eléctricas, que contribuyan a un futuro más sostenible para todos.
+                </p>
+            </div>
+        </section>
+        
+        <!-- Sección de relleno para el scrollytelling -->
+        <div class="h-screen"></div>
+
+        <!-- Pilares de la Empresa (P.6-7) -->
+        <section class="py-24 px-8 max-w-7xl mx-auto">
+            <h2 class="text-4xl font-bold text-center mb-16">Nuestros Pilares</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                <!-- Pilar 1 -->
+                <div class="glass-card p-6 rounded-lg opacity-0" data-animate="fade-in">
+                    <h3 class="text-2xl font-bold text-cyan-300 mb-2">Excelencia Técnica</h3>
+                    <p class="text-gray-300">La empresa tiene un equipo de profesionales altamente calificados y experimentados en las áreas de electricidad e ingeniería de proyectos. Nuestros profesionales están comprometidos con las ultimas tendencias tecnológicas y normativas.</p>
+                </div>
+                <!-- Pilar 2 -->
+                <div class="glass-card p-6 rounded-lg opacity-0" data-animate="fade-in" style="animation-delay: 100ms;">
+                    <h3 class="text-2xl font-bold text-cyan-300 mb-2">Calidad y Seguridad</h3>
+                    <p class="text-gray-300">Nuestra empresa garantiza la calidad y seguridad de sus trabajos y servicios, cumpliendo con todas las normas y regulaciones aplicables en Chile. Esto incluye el uso de materiales y equipos de ultima tecnología, aplicando procedimientos de trabajos seguros y capacitando a nuestro personal de trabajo.</p>
+                </div>
+                <!-- Pilar 3 -->
+                <div class="glass-card p-6 rounded-lg opacity-0" data-animate="fade-in" style="animation-delay: 200ms;">
+                    <h3 class="text-2xl font-bold text-cyan-300 mb-2">Innovación y Desarrollo</h3>
+                    <p class="text-gray-300">La empresa debe estar en constante innovación, desarrollando nuevas tecnologías y soluciones para sus clientes. Esto le permitirá mantenerse a la vanguardia del mercado y ofrecer servicios más competitivos.</p>
+                </div>
+                <!-- Pilar 4 -->
+                <div class="glass-card p-6 rounded-lg opacity-0" data-animate="fade-in" style="animation-delay: 300ms;">
+                    <h3 class="text-2xl font-bold text-cyan-300 mb-2">Responsabilidad Social</h3>
+                    <p class="text-gray-300">Somos responsable socialmente, contribuyendo al desarrollo sostenible en la comunidad... entregando herramientas a estudiantes en practicas y a nuevos profesionales... respetando el medio ambiente y reciclando todos nuestros desechos.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Servicios (P.8-13) - Scroll Horizontal -->
+        <section class="py-24">
+            <div class="max-w-7xl mx-auto px-8">
+                <h2 class="text-4xl font-bold mb-6">Servicios</h2>
+                <p class="text-lg text-gray-300 max-w-3xl mb-12">Un portafolio completo para cubrir todas sus necesidades en ingeniería eléctrica, desde la inspección hasta la mantención.</p>
+            </div>
+            
+            <div class="horizontal-scroll-section">
+                <!-- Tarjeta 1 (P.9) -->
+                <div>
+                    <div class="glass-card rounded-lg overflow-hidden h-full shadow-lg">
+                        <img src="https://placehold.co/600x400/0d1a3f/a87eff?text=Inspeccion" alt="Inspecciones Técnicas" class="w-full h-40 object-cover">
+                        <div class="p-5">
+                            <h3 class="text-xl font-bold text-purple-300 mb-2">Inspecciones Técnicas</h3>
+                            <ul class="list-disc list-inside text-gray-300 text-sm">
+                                <li>Inspección visual de instalaciones eléctricas</li>
+                                <li>Termografías</li>
+                                <li>Mediciones</li>
+                                <li>Elaboración de informes con evidencia fotográfica</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <!-- Tarjeta 2 (P.9) -->
+                <div>
+                    <div class="glass-card rounded-lg overflow-hidden h-full shadow-lg">
+                        <img src="https://placehold.co/600x400/0d1a3f/a87eff?text=Proyectos" alt="Desarrollo de Proyectos" class="w-full h-40 object-cover">
+                        <div class="p-5">
+                            <h3 class="text-xl font-bold text-purple-300 mb-2">Desarrollo de Proyectos</h3>
+                            <ul class="list-disc list-inside text-gray-300 text-sm">
+                                <li>Creación de planimetría eléctrica</li>
+                                <li>Especificaciones técnicas</li>
+                                <li>Memorias de cálculos</li>
+                                <li>Trabajo personalizado</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <!-- Tarjeta 3 (P.10) -->
+                <div>
+                    <div class="glass-card rounded-lg overflow-hidden h-full shadow-lg">
+                        <img src="https://placehold.co/600x400/0d1a3f/a87eff?text=Asesorias" alt="Asesorías de Proyectos" class="w-full h-40 object-cover">
+                        <div class="p-5">
+                            <h3 class="text-xl font-bold text-purple-300 mb-2">Asesorías de Proyectos</h3>
+                            <ul class="list-disc list-inside text-gray-300 text-sm">
+                                <li>Auditoría</li>
+                                <li>Planificación de proyecto</li>
+                                <li>Diseño de planimetría</li>
+                                <li>Inspecciones técnicas (Normativas)</li>
+                                <li>Estudio de corto circuito</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <!-- Tarjeta 4 (P.10) -->
+                <div>
+                    <div class="glass-card rounded-lg overflow-hidden h-full shadow-lg">
+                        <img src="https://placehold.co/600x400/0d1a3f/a87eff?text=Puesta+a+Tierra" alt="Sistema de Puesta a Tierra" class="w-full h-40 object-cover">
+                        <div class="p-5">
+                            <h3 class="text-xl font-bold text-purple-300 mb-2">Sistema de Puesta a Tierra</h3>
+                            <ul class="list-disc list-inside text-gray-300 text-sm">
+                                <li>Estudio de resistividad de suelo</li>
+                                <li>Mediciones de sistema</li>
+                                <li>Proyección de sistema</li>
+                                <li>Fabricación de puesta a tierra</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                 <!-- Tarjeta 5 (P.11) -->
+                <div>
+                    <div class="glass-card rounded-lg overflow-hidden h-full shadow-lg">
+                        <img src="https://placehold.co/600x400/0d1a3f/a87eff?text=Ejecucion" alt="Ejecución de Proyectos" class="w-full h-40 object-cover">
+                        <div class="p-5">
+                            <h3 class="text-xl font-bold text-purple-300 mb-2">Ejecución de Proyectos</h3>
+                            <ul class="list-disc list-inside text-gray-300 text-sm">
+                                <li>Fabricación de tableros eléctrico</li>
+                                <li>Instalación de luminarias</li>
+                                <li>Empalmes eléctricos</li>
+                                <li>Canalización subterráneo</li>
+                                <li>Declaraciones ante la SEC</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                 <!-- Tarjeta 6 (P.11) -->
+                <div>
+                    <div class="glass-card rounded-lg overflow-hidden h-full shadow-lg">
+                        <img src="https://placehold.co/600x400/0d1a3f/a87eff?text=Capacitacion" alt="Charlas y Capacitación" class="w-full h-40 object-cover">
+                        <div class="p-5">
+                            <h3 class="text-xl font-bold text-purple-300 mb-2">Charlas y Capacitación</h3>
+                            <ul class="list-disc list-inside text-gray-300 text-sm">
+                                <li>Charlas técnicas</li>
+                                <li>Capacitación en planimetría</li>
+                                <li>Capacitación en sistema eléctrico</li>
+                                <li>Capacitación en tablero eléctrico y empalmes</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <!-- Tarjeta 7 (P.12) -->
+                <div>
+                    <div class="glass-card rounded-lg overflow-hidden h-full shadow-lg">
+                        <img src="https://placehold.co/600x400/0d1a3f/a87eff?text=CCTV" alt="Sistema CCTV" class="w-full h-40 object-cover">
+                        <div class="p-5">
+                            <h3 class="text-xl font-bold text-purple-300 mb-2">Sistema CCTV</h3>
+                            <ul class="list-disc list-inside text-gray-300 text-sm">
+                                <li>Instalación</li>
+                                <li>Mantención</li>
+                                <li>Reparación de cámara de seguridad</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <!-- Tarjeta 8 (P.12) -->
+                <div>
+                    <div class="glass-card rounded-lg overflow-hidden h-full shadow-lg">
+                        <img src="https://placehold.co/600x400/0d1a3f/a87eff?text=Mantencion" alt="Mantenciones" class="w-full h-40 object-cover">
+                        <div class="p-5">
+                            <h3 class="text-xl font-bold text-purple-300 mb-2">Mantenciones</h3>
+                            <ul class="list-disc list-inside text-gray-300 text-sm">
+                                <li>Mantenciones de tablero eléctrico</li>
+                                <li>Mantenciones de central de telefonía</li>
+                                <li>Mantenciones de motores eléctrico</li>
+                                <li>Mantenciones generales eléctricas</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <!-- Tarjeta 9 (P.13) -->
+                <div>
+                    <div class="glass-card rounded-lg overflow-hidden h-full shadow-lg">
+                        <img src="https://placehold.co/600x400/0d1a3f/a87eff?text=Seguridad" alt="Seguridad Electrónica" class="w-full h-40 object-cover">
+                        <div class="p-5">
+                            <h3 class="text-xl font-bold text-purple-300 mb-2">Seguridad Electrónica</h3>
+                            <ul class="list-disc list-inside text-gray-300 text-sm">
+                                <li>Sistema de control de acceso</li>
+                                <li>Detección de intruso</li>
+                                <li>Sistema de detección de incendio</li>
+                                <li>Actualización de sistemas de alarmas</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <!-- Margen al final -->
+                <div class="flex-shrink-0 w-16"></div>
+            </div>
+        </section>
+
+        <!-- Proyectos Ejecutados (P.14-28) -->
+        <section class="py-24 px-8 max-w-7xl mx-auto">
+            <h2 class="text-4xl font-bold text-center mb-16">Proyectos Ejecutados</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <!-- Proyecto 1 (P.15) -->
+                <div class="glass-card rounded-lg p-8 opacity-0" data-animate="fade-in">
+                    <img src="https://storage.googleapis.com/org-gco-files-1/10700305_1720542387_corp-santiago.png" alt="Logo Corporación Santiago" class="h-12 mb-4" onerror="this.src='https://placehold.co/150x50/161b22/c9d1d9?text=Corp.+Santiago'; this.onerror=null;">
+                    <h3 class="text-2xl font-bold text-cyan-300 mb-2">Alumbrado Público</h3>
+                    <p class="text-gray-300">Asesoría y elaboración de planimetría eléctrica, levantamiento, estudio y proyección de iluminarias publicas. Simulación con DIALUX. Cliente: Corporación para el Desarrollo de Santiago.</p>
+                </div>
+                <!-- Proyecto 2 (P.18) -->
+                <div class="glass-card rounded-lg p-8 opacity-0" data-animate="fade-in" style="animation-delay: 100ms;">
+                    <img src="https://storage.googleapis.com/org-gco-files-1/10700305_1720542387_interconnect.png" alt="Logo Interconnect" class="h-12 mb-4" onerror="this.src='https://placehold.co/150x50/161b22/c9d1d9?text=Interconnect'; this.onerror=null;">
+                    <h3 class="text-2xl font-bold text-cyan-300 mb-2">Aumento de Potencia</h3>
+                    <p class="text-gray-300">Levantamiento y dibujo de planimetría (obra civil y eléctrica), estudio de resistividad de suelo y asesoría para aumento de potencia de empalme MT. Cliente: Empresa INTERCONNECT, Estación Valparaíso.</p>
+                </div>
+                <!-- Proyecto 3 (P.20) -->
+                <div class="glass-card rounded-lg p-8 opacity-0" data-animate="fade-in">
+                    <img src="https://storage.googleapis.com/org-gco-files-1/10700305_1720542387_ciquimet.png" alt="Logo Ciquimet" class="h-12 mb-4" onerror="this.src='https://placehold.co/150x50/161b22/c9d1d9?text=Ciquimet'; this.onerror=null;">
+                    <h3 class="text-2xl font-bold text-cyan-300 mb-2">Resistividad de Suelo</h3>
+                    <p class="text-gray-300">Estudio para proyección de nueva malla a tierra, construcción y mejoramiento de suelo. Inspección técnica de instalación existente y diseño de planimetría. Cliente: CIQUIMET, Calama.</p>
+                </div>
+                <!-- Proyecto 4 (P.22) -->
+                <div class="glass-card rounded-lg p-8 opacity-0" data-animate="fade-in" style="animation-delay: 100ms;">
+                    <img src="https://storage.googleapis.com/org-gco-files-1/10700305_1720542387_besalco.png" alt="Logo Besalco" class="h-12 mb-4" onerror="this.src='https://placehold.co/150x50/161b22/c9d1d9?text=Besalco'; this.onerror=null;">
+                    <h3 class="text-2xl font-bold text-cyan-300 mb-2">Inspección y Normalización</h3>
+                    <p class="text-gray-300">Inspección técnica de tableros eléctricos. Revisión e inspección de puesta a tierra. Cliente: BESALCO MINERÍA, Minera Centinela, Sierra Gorda.</p>
+                </div>
+                 <!-- Proyecto 5 (P.26, 28) -->
+                <div class="glass-card rounded-lg p-8 opacity-0" data-animate="fade-in">
+                    <img src="https://storage.googleapis.com/org-gco-files-1/10700305_1720542387_tcc.png" alt="Logo TCC" class="h-12 mb-4" onerror="this.src='https://placehold.co/150x50/161b22/c9d1d9?text=TCC'; this.onerror=null;">
+                    <h3 class="text-2xl font-bold text-cyan-300 mb-2">Cursos de Capacitación</h3>
+                    <p class="text-gray-300">Elaboración de cursos de AutoCAD, Ms Office, Impresión 3D, Preparación Licencia SEC Clase B, y Elaboración de Proyecto antes la SEC. Clientes: TECHNOLOGY COLLEGE CHILE y MEKOTEK.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Equipo (P.30) -->
+        <section class="py-24 px-8 max-w-5xl mx-auto text-center">
+            <h2 class="text-4xl font-bold text-center mb-16">Conoce a Nuestro Equipo</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <!-- Miembro 1 -->
+                <div class="opacity-0" data-animate="fade-in">
+                    <img src="https://placehold.co/200x200/0d1a3f/a87eff?text=P.A." class="w-48 h-48 object-cover rounded-full mx-auto hexagon-clip" alt="Foto de Patricia Aros">
+                    <h3 class="text-2xl font-bold text-cyan-300 mt-4">Patricia Aros</h3>
+                    <p class="text-purple-300">Gerenta General</p>
+                </div>
+                <!-- Miembro 2 -->
+                <div class="opacity-0" data-animate="fade-in" style="animation-delay: 100ms;">
+                    <img src="https://placehold.co/200x200/0d1a3f/a87eff?text=P.N." class="w-48 h-48 object-cover rounded-full mx-auto hexagon-clip" alt="Foto de Pablo Navarro">
+                    <h3 class="text-2xl font-bold text-cyan-300 mt-4">Pablo Navarro</h3>
+                    <p class="text-purple-300">Encargado de Proyecto</p>
+                </div>
+                <!-- Miembro 3 -->
+                <div class="opacity-0" data-animate="fade-in" style="animation-delay: 200ms;">
+                    <img src="https://placehold.co/200x200/0d1a3f/a87eff?text=D.C." class="w-48 h-48 object-cover rounded-full mx-auto hexagon-clip" alt="Foto de Dario Carvajal">
+                    <h3 class="text-2xl font-bold text-cyan-300 mt-4">Dario Carvajal</h3>
+                    <p class="text-purple-300">Ingeniero Proyectista</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Contacto (P.31) -->
+        <footer class="py-20 mt-24 px-8 glass-card border-t border-purple-300/10">
+            <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8 text-center md:text-left">
+                <div>
+                    <h3 class="text-2xl font-bold text-cyan-300">NAVALEK SPA</h3>
+                    <p class="text-gray-400">RUT: 77.555.114-3</p>
+                     <p class="text-gray-400 mt-4">Representante Legal: Patricia Aros O.</p>
+                     <p class="text-gray-400">RUT: 16.820.694-1</p>
+                </div>
+                <div>
+                    <h4 class="text-lg font-bold text-purple-300 mb-2">Contacto</h4>
+                    <p class="text-gray-300">Contactonavalek@gmail.com</p>
+                    <p class="text-gray-300">+56956202155</p>
+                </div>
+                <div>
+                    <h4 class="text-lg font-bold text-purple-300 mb-2">Ubicación</h4>
+                    <p class="text-gray-300">Av. Libertad #269, of 904, Viña del Mar</p>
+                </div>
+            </div>
+        </footer>
+
+    </main>
+
+    <!-- Lógica del WebGL y Animaciones -->
+    <script type="module">
+        import * as THREE from 'three';
+
+        // --- Configuración básica de Three.js ---
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 100);
+        camera.position.set(0, 0, 10);
+        
+        const renderer = new THREE.WebGLRenderer({ 
+            canvas: document.getElementById('webgl-canvas'),
+            alpha: true 
+        });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+        // --- El "Circuito Digital" (Grilla con Shader) ---
+        const planeSize = 50;
+        const planeSegments = 50;
+        
+        const geometry = new THREE.PlaneGeometry(planeSize, planeSize, planeSegments, planeSegments);
+        
+        // Colores del PDF
+        const colorDeepBlue = new THREE.Color(0x0d1a3f);
+        const colorPurple = new THREE.Color(0xa87eff); // #a87eff
+        const colorCyan = new THREE.Color(0x00ffff);   // #00ffff
+
+        const material = new THREE.ShaderMaterial({
+            uniforms: {
+                u_time: { value: 0.0 },
+                u_scroll: { value: 0.0 },
+                u_color_a: { value: colorPurple },
+                u_color_b: { value: colorCyan }
+            },
+            vertexShader: `
+                uniform float u_time;
+                uniform float u_scroll;
+                
+                varying float v_wave;
+                
+                // Simplex Noise 2D
+                vec3 mod289(vec3 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
+                vec2 mod289(vec2 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
+                vec3 permute(vec3 x) { return mod289(((x*34.0)+1.0)*x); }
+
+                float snoise(vec2 v) {
+                    const vec4 C = vec4(0.211324865405187,  // (3.0-sqrt(3.0))/6.0
+                                        0.366025403784439,  // 0.5*(sqrt(3.0)-1.0)
+                                        -0.577350269189626, // (1.0-sqrt(3.0))/2.0
+                                        0.024390243902439); // 1.0/41.0
+                    vec2 i  = floor(v + dot(v, C.yy) );
+                    vec2 x0 = v -   i + dot(i, C.xx);
+                    vec2 i1;
+                    i1 = (x0.x > x0.y) ? vec2(1.0, 0.0) : vec2(0.0, 1.0);
+                    vec4 x12 = x0.xyxy + C.xxzz;
+                    x12.xy -= i1;
+                    i = mod289(i);
+                    vec3 p = permute( permute( i.y + vec3(0.0, i1.y, 1.0 )) + i.x + vec3(0.0, i1.x, 1.0 ));
+                    vec3 m = max(0.5 - vec3(dot(x0,x0), dot(x12.xy,x12.xy), dot(x12.zw,x12.zw)), 0.0);
+                    m = m*m;
+                    m = m*m;
+                    vec3 x = 2.0 * fract(p * C.www) - 1.0;
+                    vec3 h = abs(x) - 0.5;
+                    vec3 ox = floor(x + 0.5);
+                    vec3 a0 = x - ox;
+                    m *= (1.79284291400159 - 0.85373472077480 * ( a0*a0 + h*h ));
+                    vec3 g;
+                    g.x  = a0.x  * x0.x  + h.x  * x0.y;
+                    g.yz = a0.yz * x12.xz + h.yz * x12.yw;
+                    return 130.0 * dot(m, g);
+                }
+
+                void main() {
+                    vec3 pos = position;
+                    
+                    // 1. Ola de scroll
+                    float scrollWave = 1.0 - smoothstep(0.0, 0.5, abs(pos.y * 0.1 + u_scroll));
+                    
+                    // 2. Ruido sutil para el "flujo"
+                    float noise = snoise(vec2(pos.x * 0.1 + u_time * 0.1, pos.y * 0.1 + u_time * 0.1));
+                    
+                    // 3. Aplicar al Z (altura)
+                    pos.z += (scrollWave * 2.0) + (noise * 0.2);
+                    
+                    // Pasar la intensidad de la ola al fragment shader
+                    v_wave = scrollWave;
+                    
+                    gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);
+                }
+            `,
+            fragmentShader: `
+                uniform vec3 u_color_a; // Purple
+                uniform vec3 u_color_b; // Cyan
+                
+                varying float v_wave; // Intensidad de la ola
+                
+                void main() {
+                    // Mezclar colores basado en la ola
+                    vec3 color = mix(u_color_a, u_color_b, v_wave);
+                    
+                    // gl_FragColor = vec4(color, v_wave > 0.1 ? 1.0 : 0.2);
+                    gl_FragColor = vec4(color, 1.0);
+                }
+            `,
+            wireframe: true,
+            transparent: true,
+            opacity: 0.5
+        });
+
+        const circuit = new THREE.Mesh(geometry, material);
+        circuit.rotation.x = -0.3; // Inclinarlo un poco
+        scene.add(circuit);
+
+        // --- Control del Scroll ---
+        let scrollY = window.scrollY;
+        let currentScroll = window.scrollY;
+        const lerp = (a, b, t) => (1 - t) * a + t * b;
+        
+        function updateScroll() {
+            scrollY = window.scrollY;
+        }
+        window.addEventListener('scroll', updateScroll);
+
+        // --- Bucle de Animación ---
+        const clock = new THREE.Clock();
+        function animate() {
+            requestAnimationFrame(animate);
+            
+            const elapsedTime = clock.getElapsedTime();
+            
+            // 1. Suavizar el scroll
+            currentScroll = lerp(currentScroll, scrollY, 0.05);
+
+            // 2. Calcular el progreso
+            const scrollableHeight = document.body.scrollHeight - window.innerHeight;
+            const scrollProgress = scrollableHeight > 0 ? currentScroll / scrollableHeight : 0;
+            
+            // 3. Actualizar uniforms del shader
+            material.uniforms.u_scroll.value = lerp(2.5, -2.5, scrollProgress);
+            material.uniforms.u_time.value = elapsedTime;
+
+            // 4. Mover la cámara sutilmente
+            camera.position.x = Math.sin(elapsedTime * 0.1) * 0.5;
+            camera.lookAt(0, 0, 0);
+
+            // 5. Lógica de Scrollytelling
+            const cards = document.querySelectorAll('[data-scrolly]');
+            const numCards = cards.length;
+            const cardProgress = scrollProgress * (numCards + 1); 
+            
+            cards.forEach((card, i) => {
+                const cardIndex = i + 1;
+                const opacity = Math.max(0, 1.0 - Math.abs(cardProgress - cardIndex));
+                card.style.opacity = opacity;
+            });
+
+            renderer.render(scene, camera);
+        }
+        animate();
+
+        // --- Manejo de Redimensión ---
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        }
+        window.addEventListener('resize', onWindowResize);
+
+        // --- Animaciones de Fade-in (IntersectionObserver) ---
+        const animatedElements = document.querySelectorAll('[data-animate="fade-in"]');
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.transition = 'opacity 0.7s ease-out, transform 0.7s ease-out';
+                    entry.target.style.opacity = 1;
+                    entry.target.style.transform = 'translateY(0)';
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.1 });
+
+        animatedElements.forEach(el => {
+            el.style.opacity = 0;
+            el.style.transform = 'translateY(30px)';
+            observer.observe(el);
+        });
+
+        // --- Reemplazo de imágenes rotas (Logos y Equipo) ---
+        // (No es necesario en esta versión, ya que las URLs del PDF están en GCS)
+        // (Se añaden placeholders para imágenes de servicios y equipo)
+        
+        const serviceImages = document.querySelectorAll('.horizontal-scroll-section img');
+        serviceImages.forEach((img, i) => {
+            const texts = ['Inspeccion', 'Proyectos', 'Asesorias', 'Puesta+a+Tierra', 'Ejecucion', 'Capacitacion', 'CCTV', 'Mantencion', 'Seguridad'];
+            img.onerror = () => {
+                img.src = `https://placehold.co/600x400/0d1a3f/a87eff?text=${texts[i] || 'Servicio'}`;
+            };
+            if (!img.getAttribute('src') || img.getAttribute('src').includes('placehold.co')) {
+                 img.src = `https://placehold.co/600x400/0d1a3f/a87eff?text=${texts[i] || 'Servicio'}`;
+            }
+        });
+
+        const teamImages = document.querySelectorAll('.hexagon-clip');
+        teamImages.forEach((img, i) => {
+             const texts = ['P.A.', 'P.N.', 'D.C.'];
+            img.onerror = () => {
+                img.src = `https://placehold.co/200x200/0d1a3f/a87eff?text=${texts[i] || 'Equipo'}`;
+            };
+            if (!img.getAttribute('src') || img.getAttribute('src').includes('placehold.co')) {
+                 img.src = `https://placehold.co/200x200/0d1a3f/a87eff?text=${texts[i] || 'Equipo'}`;
+            }
+        });
+
+    </script>
+
+</body>
+</html>
