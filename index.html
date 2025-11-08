@@ -416,14 +416,17 @@
             uniforms: {
                 u_time: { value: 0.0 },
                 u_scroll: { value: 0.0 },
+                u_mouse: { value: new THREE.Vector2(0, 0) },
                 u_color_a: { value: colorPurple },
                 u_color_b: { value: colorCyan }
             },
             vertexShader: `
                 uniform float u_time;
                 uniform float u_scroll;
+                uniform vec2 u_mouse;
                 
                 varying float v_wave;
+                varying float v_mouse_wave;
                 
                 // Simplex Noise 2D
                 vec3 mod289(vec3 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
@@ -465,12 +468,17 @@
                     
                     // 2. Ruido sutil para el "flujo"
                     float noise = snoise(vec2(pos.x * 0.1 + u_time * 0.1, pos.y * 0.1 + u_time * 0.1));
+
+                    // 3. Ola del mouse
+                    float dist = distance(pos.xy, u_mouse);
+                    float mouseWave = 1.0 - smoothstep(0.0, 2.5, dist); // Radio de 2.5 unidades
                     
-                    // 3. Aplicar al Z (altura)
-                    pos.z += (scrollWave * 2.0) + (noise * 0.2);
+                    // 4. Aplicar todo al Z (altura)
+                    pos.z += (scrollWave * 2.0) + (noise * 0.2) + (mouseWave * 3.0);
                     
-                    // Pasar la intensidad de la ola al fragment shader
+                    // Pasar intensidades al fragment shader
                     v_wave = scrollWave;
+                    v_mouse_wave = mouseWave;
                     
                     gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);
                 }
@@ -479,14 +487,17 @@
                 uniform vec3 u_color_a; // Purple
                 uniform vec3 u_color_b; // Cyan
                 
-                varying float v_wave; // Intensidad de la ola
+                varying float v_wave;
+                varying float v_mouse_wave;
                 
                 void main() {
-                    // Mezclar colores basado en la ola
-                    vec3 color = mix(u_color_a, u_color_b, v_wave);
+                    // Mezclar colores basado en la ola de scroll
+                    vec3 scrollColor = mix(u_color_a, u_color_b, v_wave);
+
+                    // Donde está el mouse, el color se vuelve más brillante (casi blanco)
+                    vec3 finalColor = mix(scrollColor, vec3(1.0, 1.0, 1.0), v_mouse_wave);
                     
-                    // gl_FragColor = vec4(color, v_wave > 0.1 ? 1.0 : 0.2);
-                    gl_FragColor = vec4(color, 1.0);
+                    gl_FragColor = vec4(finalColor, 1.0);
                 }
             `,
             wireframe: true,
@@ -498,15 +509,22 @@
         circuit.rotation.x = -0.3; // Inclinarlo un poco
         scene.add(circuit);
 
-        // --- Control del Scroll ---
+        // --- Controladores ---
+        const lerp = (a, b, t) => (1 - t) * a + t * b;
+
+        // Scroll
         let scrollY = window.scrollY;
         let currentScroll = window.scrollY;
-        const lerp = (a, b, t) => (1 - t) * a + t * b;
+        window.addEventListener('scroll', () => { scrollY = window.scrollY; });
         
-        function updateScroll() {
-            scrollY = window.scrollY;
-        }
-        window.addEventListener('scroll', updateScroll);
+        // Mouse
+        const mouse = new THREE.Vector2(0, 0);
+        const targetMouse = new THREE.Vector2(0, 0);
+        window.addEventListener('mousemove', (event) => {
+            mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+            mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+        });
+
 
         // --- Bucle de Animación ---
         const clock = new THREE.Clock();
@@ -515,18 +533,27 @@
             
             const elapsedTime = clock.getElapsedTime();
             
-            // 1. Suavizar el scroll
+            // 1. Suavizar scroll
             currentScroll = lerp(currentScroll, scrollY, 0.05);
-
-            // 2. Calcular el progreso
             const scrollableHeight = document.body.scrollHeight - window.innerHeight;
             const scrollProgress = scrollableHeight > 0 ? currentScroll / scrollableHeight : 0;
             
-            // 3. Actualizar uniforms del shader
+            // 2. Suavizar mouse
+            targetMouse.lerp(mouse, 0.1);
+
+            // 3. Convertir coordenadas del mouse al plano 3D
+            const vFOV = THREE.MathUtils.degToRad(camera.fov);
+            const height = 2 * Math.tan(vFOV / 2) * camera.position.z;
+            const width = height * camera.aspect;
+            const mouse3D_x = targetMouse.x * (width / 2);
+            const mouse3D_y = targetMouse.y * (height / 2);
+
+            // 4. Actualizar uniforms del shader
             material.uniforms.u_scroll.value = lerp(2.5, -2.5, scrollProgress);
             material.uniforms.u_time.value = elapsedTime;
+            material.uniforms.u_mouse.value.set(mouse3D_x, mouse3D_y);
 
-            // 4. Mover la cámara sutilmente
+            // 5. Mover la cámara sutilmente
             camera.position.x = Math.sin(elapsedTime * 0.1) * 0.5;
             camera.lookAt(0, 0, 0);
 
@@ -545,9 +572,6 @@
 
 
         // --- Reemplazo de imágenes rotas (Logos y Equipo) ---
-        // (No es necesario en esta versión, ya que las URLs del PDF están en GCS)
-        // (Se añaden placeholders para imágenes de servicios y equipo)
-        
         const teamImages = document.querySelectorAll('.hexagon-clip');
         teamImages.forEach((img, i) => {
              const texts = ['P.A.', 'P.N.', 'D.C.'];
