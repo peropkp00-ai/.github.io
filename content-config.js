@@ -8,6 +8,7 @@ export const contentConfig = {
     hero_scroll_prompt: "Haz scroll para activar el flujo",
 
     // --- Navegación ---
+    nav_brand: "NAVALEK",
     nav_quienes_somos: "Quiénes Somos",
     nav_servicios: "Servicios",
     nav_proyectos: "Proyectos",
