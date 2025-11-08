@@ -388,6 +388,19 @@
     <!-- Lógica del WebGL y Animaciones -->
     <script type="module">
         import * as THREE from 'three';
+        import { animationConfig } from './config.js';
+
+        // --- Cargar Configuración de Animación ---
+        const defaultConfig = animationConfig || {};
+        const storageKey = 'userAnimationConfig';
+        let settings;
+        try {
+            const savedSettings = localStorage.getItem(storageKey);
+            settings = savedSettings ? { ...defaultConfig, ...JSON.parse(savedSettings) } : { ...defaultConfig };
+        } catch (e) {
+            console.error("No se pudo cargar la configuración de la animación, usando valores por defecto.", e);
+            settings = { ...defaultConfig };
+        }
 
         // --- Configuración básica de Three.js ---
         const scene = new THREE.Scene();
@@ -407,23 +420,28 @@
         
         const geometry = new THREE.PlaneGeometry(planeSize, planeSize, planeSegments, planeSegments);
         
-        // Colores del PDF
-        const colorDeepBlue = new THREE.Color(0x0d1a3f);
-        const colorPurple = new THREE.Color(0xa87eff); // #a87eff
-        const colorCyan = new THREE.Color(0x00ffff);   // #00ffff
+        // Colores y parámetros de la configuración
+        const colorA = new THREE.Color(settings.colorA);
+        const colorB = new THREE.Color(settings.colorB);
+        const colorInteraction = new THREE.Color(settings.colorInteraction);
 
         const material = new THREE.ShaderMaterial({
             uniforms: {
                 u_time: { value: 0.0 },
                 u_scroll: { value: 0.0 },
                 u_mouse: { value: new THREE.Vector2(0, 0) },
-                u_color_a: { value: colorPurple },
-                u_color_b: { value: colorCyan }
+                u_color_a: { value: colorA },
+                u_color_b: { value: colorB },
+                u_color_interaction: { value: colorInteraction },
+                u_mouse_wave_radius: { value: settings.mouseWaveRadius },
+                u_mouse_wave_intensity: { value: settings.mouseWaveIntensity }
             },
             vertexShader: `
                 uniform float u_time;
                 uniform float u_scroll;
                 uniform vec2 u_mouse;
+                uniform float u_mouse_wave_radius;
+                uniform float u_mouse_wave_intensity;
                 
                 varying float v_wave;
                 varying float v_mouse_wave;
@@ -471,10 +489,10 @@
 
                     // 3. Ola del mouse
                     float dist = distance(pos.xy, u_mouse);
-                    float mouseWave = 1.0 - smoothstep(0.0, 2.5, dist); // Radio de 2.5 unidades
+                    float mouseWave = 1.0 - smoothstep(0.0, u_mouse_wave_radius, dist);
                     
                     // 4. Aplicar todo al Z (altura)
-                    pos.z += (scrollWave * 2.0) + (noise * 0.2) + (mouseWave * 3.0);
+                    pos.z += (scrollWave * 2.0) + (noise * 0.2) + (mouseWave * u_mouse_wave_intensity);
                     
                     // Pasar intensidades al fragment shader
                     v_wave = scrollWave;
@@ -484,8 +502,9 @@
                 }
             `,
             fragmentShader: `
-                uniform vec3 u_color_a; // Purple
-                uniform vec3 u_color_b; // Cyan
+                uniform vec3 u_color_a;
+                uniform vec3 u_color_b;
+                uniform vec3 u_color_interaction;
                 
                 varying float v_wave;
                 varying float v_mouse_wave;
@@ -494,8 +513,8 @@
                     // Mezclar colores basado en la ola de scroll
                     vec3 scrollColor = mix(u_color_a, u_color_b, v_wave);
 
-                    // Donde está el mouse, el color se vuelve más brillante (casi blanco)
-                    vec3 finalColor = mix(scrollColor, vec3(1.0, 1.0, 1.0), v_mouse_wave);
+                    // Donde está el mouse, el color se vuelve más brillante
+                    vec3 finalColor = mix(scrollColor, u_color_interaction, v_mouse_wave);
 
                     gl_FragColor = vec4(finalColor, 1.0);
                 }
@@ -539,7 +558,7 @@
             const scrollProgress = scrollableHeight > 0 ? currentScroll / scrollableHeight : 0;
             
             // 2. Suavizar mouse
-            targetMouse.lerp(mouse, 0.1);
+            targetMouse.lerp(mouse, settings.mouseFollowSpeed);
 
             // 3. Convertir coordenadas del mouse al plano 3D
             const vFOV = THREE.MathUtils.degToRad(camera.fov);
