@@ -123,22 +123,22 @@
                 <!-- Quienes Somos -->
                 <div class="glass-card p-8 rounded-2xl shadow-2xl">
                     <h3 class="text-2xl font-bold text-purple-300 mb-4">Quiénes Somos</h3>
-                    <p class="text-gray-200 leading-relaxed">
-                        Somos un equipo de profesionales con una gran pasión por el servicio a nuestros clientes y a nuestra empresa. Contamos con una amplia experiencia en proyectos de ingeniería y asesorías eléctricas, estamos comprometidos con entregar un servicio de calidad y personalizado.
+                    <p id="content-quienesSomos" class="text-gray-200 leading-relaxed">
+                        <!-- El contenido se inyectará aquí -->
                     </p>
                 </div>
                 <!-- Misión -->
                 <div class="glass-card p-8 rounded-2xl shadow-2xl">
                     <h3 class="text-2xl font-bold text-cyan-300 mb-4">Nuestra Misión</h3>
-                    <p class="text-gray-200 leading-relaxed">
-                        Ofrecer soluciones integrales de ingeniería eléctrica y asesorías, que permitan a nuestros clientes mejorar la seguridad en sus instalaciones y con eficiencia energética, optimizando sus costos y contribuir al desarrollo sostenible.
+                    <p id="content-nuestraMision" class="text-gray-200 leading-relaxed">
+                        <!-- El contenido se inyectará aquí -->
                     </p>
                 </div>
                 <!-- Visión -->
                 <div class="glass-card p-8 rounded-2xl shadow-2xl">
                     <h3 class="text-2xl font-bold text-purple-300 mb-4">Nuestra Visión</h3>
-                    <p class="text-gray-200 leading-relaxed">
-                        Ser el socio estratégico asegurando un correcto funcionamiento de las instalaciones eléctricas en el tiempo, generando que las empresas y organizaciones alcancen objetivos de sostenibilidad y eficiencia energética a través de soluciones innovadoras en proyecto de ingeniería y asesorías eléctricas, que contribuyan a un futuro más sostenible para todos.
+                    <p id="content-nuestraVision" class="text-gray-200 leading-relaxed">
+                        <!-- El contenido se inyectará aquí -->
                     </p>
                 </div>
             </div>
@@ -584,5 +584,37 @@
 
     </script>
 
+    <!-- Lógica de Carga de Contenido Dinámico -->
+    <script type="module">
+        import { contentConfig } from './content-config.js';
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const defaultConfig = contentConfig || {};
+            const storageKey = 'userContentConfig';
+            let settings;
+
+            try {
+                const savedSettings = localStorage.getItem(storageKey);
+                settings = savedSettings ? { ...defaultConfig, ...JSON.parse(savedSettings) } : { ...defaultConfig };
+            } catch (e) {
+                console.error("No se pudo cargar el contenido personalizado, usando valores por defecto.", e);
+                settings = { ...defaultConfig };
+            }
+
+            // Mapeo de claves de configuración a IDs de elementos
+            const contentMap = {
+                quienesSomos: 'content-quienesSomos',
+                nuestraMision: 'content-nuestraMision',
+                nuestraVision: 'content-nuestraVision',
+            };
+
+            for (const key in contentMap) {
+                const element = document.getElementById(contentMap[key]);
+                if (element && settings[key]) {
+                    element.textContent = settings[key];
+                }
+            }
+        });
+    </script>
 </body>
 </html>
