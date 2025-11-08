@@ -48,7 +48,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    function applyAndSaveChanges(isInitialLoad = false) {
+function applyAndSaveChanges() {
         const currentAnimConfig = {};
         const currentContentConfig = {};
 
@@ -66,6 +66,7 @@ document.addEventListener('DOMContentLoaded', () => {
             localStorage.setItem(animStorageKey, JSON.stringify(currentAnimConfig));
             localStorage.setItem(contentStorageKey, JSON.stringify(currentContentConfig));
 
+        // La actualización de texto en tiempo real se mantiene
             if (iframe && iframe.contentWindow && iframe.contentWindow.document) {
                 const iframeDoc = iframe.contentWindow.document;
                 for (const key in currentContentConfig) {
@@ -86,13 +87,6 @@ document.addEventListener('DOMContentLoaded', () => {
                         }
                     }
                 }
-
-                const animKeys = Object.keys(currentAnimConfig);
-                const hasAnimChanges = animKeys.some(k => inputs[k] && inputs[k].type !== 'textarea' && inputs[k].type !== 'text');
-
-                if (!isInitialLoad && hasAnimChanges) {
-                     iframe.contentWindow.location.reload();
-                }
             }
         } catch (error) {
             console.error("Error al guardar o aplicar la configuración:", error);
@@ -104,21 +98,36 @@ document.addEventListener('DOMContentLoaded', () => {
     populateForm(currentAnimSettings, currentContentSettings);
 
     iframe.addEventListener('load', () => {
-        applyAndSaveChanges(true);
+        // Al cargar el iframe, se aplican los cambios de texto sin recargar
+        applyAndSaveChanges();
     });
 
-    form.addEventListener('input', () => {
-        for (const key in valueDisplays) {
-            if (inputs[key] && valueDisplays[key]) {
-                valueDisplays[key].textContent = inputs[key].value;
-            }
+    form.addEventListener('input', (event) => {
+        const changedInput = event.target;
+        // Actualiza las pantallas de valores para los controles deslizantes en tiempo real
+        if (valueDisplays[changedInput.id]) {
+            valueDisplays[changedInput.id].textContent = changedInput.value;
         }
+        // Guarda todos los cambios en cada entrada, actualizando el texto en vivo
         applyAndSaveChanges();
+    });
+
+    // Añade un detector de cambios para recargar en los controles de animación
+    form.addEventListener('change', (event) => {
+        const changedInput = event.target;
+        // Recarga el iframe solo si se ha modificado un control de animación
+        if (changedInput.id in defaultAnimConfig) {
+            // Primero guarda el valor más reciente
+            applyAndSaveChanges();
+            // Luego recarga para mostrar el cambio de animación
+            iframe.contentWindow.location.reload();
+        }
     });
 
     saveButton.addEventListener('click', (event) => {
         event.preventDefault();
-        applyAndSaveChanges();
+        applyAndSaveChanges(); // Asegura que los últimos cambios se guarden
+        iframe.contentWindow.location.reload(); // Recarga para asegurar que todos los cambios (incluida la animación) se apliquen
         saveButton.textContent = '¡Guardado!';
         setTimeout(() => { saveButton.textContent = 'Guardar Cambios'; }, 1500);
     });
