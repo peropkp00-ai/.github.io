@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Editor de Animación - NAVALEK SPA</title>
+    <title>Editor de Contenido y Animación - NAVALEK SPA</title>
 
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -11,39 +11,22 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700;900&display=swap" rel="stylesheet">
 
     <style>
-        body, html {
-            height: 100%;
-            margin: 0;
-            font-family: 'Inter', sans-serif;
-            background-color: #0d1a3f;
-            color: #f3f4f6;
-            overflow: hidden; /* Evita el scroll en el contenedor principal */
-        }
-        #editor-container {
-            display: flex;
-            height: 100vh;
-        }
-        #controls-panel {
-            width: 30%;
-            min-width: 350px;
-            padding: 1.5rem;
-            overflow-y: auto;
-            background-color: #111827; /* Gray 900 */
-            border-right: 1px solid #374151; /* Gray 700 */
-        }
-        #preview-panel {
-            flex-grow: 1;
-        }
-        #preview-iframe {
-            width: 100%;
-            height: 100%;
-            border: none;
-        }
-        .control-group { margin-bottom: 1.5rem; }
-        .control-group label { display: block; margin-bottom: 0.5rem; font-weight: bold; color: #c7d2fe; }
-        .control-group input[type="range"] { width: 100%; }
-        .control-group input[type="color"] { width: 100%; height: 3rem; padding: 0.25rem; border: none; background-color: transparent; }
+        body, html { height: 100%; margin: 0; font-family: 'Inter', sans-serif; background-color: #0d1a3f; color: #f3f4f6; overflow: hidden; }
+        #editor-container { display: flex; height: 100vh; }
+        #controls-panel { width: 35%; min-width: 450px; padding: 1.5rem; overflow-y: auto; background-color: #111827; border-right: 1px solid #374151; }
+        #preview-panel { flex-grow: 1; }
+        #preview-iframe { width: 100%; height: 100%; border: none; }
+
+        .control-group { margin-bottom: 1rem; }
+        .control-group label { display: block; margin-bottom: 0.25rem; font-weight: bold; color: #c7d2fe; font-size: 0.875rem; }
+        .control-group input, .control-group textarea { width: 100%; background-color: #1f2937; color: white; padding: 0.5rem; border-radius: 0.375rem; border: 1px solid #4b5563; transition: border-color 0.2s, box-shadow 0.2s; }
+        .control-group input:focus, .control-group textarea:focus { outline: none; border-color: #22d3ee; box-shadow: 0 0 0 2px rgba(34, 211, 238, 0.5); }
         .value-display { display: inline-block; margin-left: 1rem; font-weight: bold; color: #a87eff; }
+
+        details { margin-bottom: 1.5rem; border-bottom: 1px solid #374151; padding-bottom: 1.5rem; }
+        details > summary { cursor: pointer; font-size: 1.25rem; font-weight: 700; color: #67e8f9; margin-bottom: 0.5rem; }
+        details[open] > summary { margin-bottom: 1rem; }
+        .grid-2-col { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; }
     </style>
 </head>
 <body class="antialiased">
@@ -51,62 +34,154 @@
     <div id="editor-container">
         <!-- Panel de Controles -->
         <div id="controls-panel">
-            <h1 class="text-3xl font-black text-center mb-2 text-cyan-300">Editor de Animación</h1>
-            <p class="text-center text-gray-400 mb-6 text-sm">
-                Los cambios se aplican en tiempo real en la vista previa.
-            </p>
-
+            <h1 class="text-3xl font-black text-center mb-6 text-cyan-300">Editor de Contenido</h1>
             <form id="editor-form">
-                <div class="control-group">
-                    <label for="mouseFollowSpeed">Velocidad de Seguimiento</label>
-                    <input type="range" id="mouseFollowSpeed" name="mouseFollowSpeed" min="0.01" max="1" step="0.01">
-                    <span class="value-display" id="mouseFollowSpeed-value"></span>
-                </div>
-                <div class="control-group">
-                    <label for="mouseWaveRadius">Radio de Ola del Mouse</label>
-                    <input type="range" id="mouseWaveRadius" name="mouseWaveRadius" min="0.1" max="10" step="0.1">
-                    <span class="value-display" id="mouseWaveRadius-value"></span>
-                </div>
-                <div class="control-group">
-                    <label for="mouseWaveIntensity">Intensidad de Ola del Mouse</label>
-                    <input type="range" id="mouseWaveIntensity" name="mouseWaveIntensity" min="0.1" max="10" step="0.1">
-                    <span class="value-display" id="mouseWaveIntensity-value"></span>
-                </div>
-                <hr class="my-6 border-gray-700">
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div class="control-group text-center">
-                        <label for="colorA">Color A</label>
-                        <input type="color" id="colorA" name="colorA">
-                    </div>
-                    <div class="control-group text-center">
-                        <label for="colorB">Color B</label>
-                        <input type="color" id="colorB" name="colorB">
-                    </div>
-                    <div class="control-group text-center">
-                        <label for="colorInteraction">Color Interacción</label>
-                        <input type="color" id="colorInteraction" name="colorInteraction">
-                    </div>
-                </div>
-                <hr class="my-6 border-gray-700">
 
-                <!-- Sección de Edición de Contenido -->
-                <h2 class="text-2xl font-bold text-center mt-8 mb-4 text-cyan-300">Edición de Contenido</h2>
-                <div class="control-group">
-                    <label for="quienesSomos">Quiénes Somos</label>
-                    <textarea id="quienesSomos" name="quienesSomos" rows="6" class="w-full bg-gray-800 text-white p-2 rounded-md border border-gray-600 focus:outline-none focus:ring-2 focus:ring-cyan-500"></textarea>
-                </div>
-                <div class="control-group">
-                    <label for="nuestraMision">Nuestra Misión</label>
-                    <textarea id="nuestraMision" name="nuestraMision" rows="6" class="w-full bg-gray-800 text-white p-2 rounded-md border border-gray-600 focus:outline-none focus:ring-2 focus:ring-cyan-500"></textarea>
-                </div>
-                <div class="control-group">
-                    <label for="nuestraVision">Nuestra Visión</label>
-                    <textarea id="nuestraVision" name="nuestraVision" rows="6" class="w-full bg-gray-800 text-white p-2 rounded-md border border-gray-600 focus:outline-none focus:ring-2 focus:ring-cyan-500"></textarea>
-                </div>
+                <!-- Sección Animación -->
+                <details>
+                    <summary>Configuración de Animación</summary>
+                    <div class="control-group">
+                        <label for="mouseFollowSpeed">Velocidad de Seguimiento</label>
+                        <input type="range" id="mouseFollowSpeed" name="mouseFollowSpeed" min="0.01" max="1" step="0.01">
+                        <span class="value-display" id="mouseFollowSpeed-value"></span>
+                    </div>
+                    <div class="control-group">
+                        <label for="mouseWaveRadius">Radio de Ola del Mouse</label>
+                        <input type="range" id="mouseWaveRadius" name="mouseWaveRadius" min="0.1" max="10" step="0.1">
+                        <span class="value-display" id="mouseWaveRadius-value"></span>
+                    </div>
+                    <div class="control-group">
+                        <label for="mouseWaveIntensity">Intensidad de Ola del Mouse</label>
+                        <input type="range" id="mouseWaveIntensity" name="mouseWaveIntensity" min="0.1" max="10" step="0.1">
+                        <span class="value-display" id="mouseWaveIntensity-value"></span>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="control-group text-center"><label for="colorA">Color A</label><input type="color" id="colorA" name="colorA"></div>
+                        <div class="control-group text-center"><label for="colorB">Color B</label><input type="color" id="colorB" name="colorB"></div>
+                        <div class="control-group text-center"><label for="colorInteraction">Color Interacción</label><input type="color" id="colorInteraction" name="colorInteraction"></div>
+                    </div>
+                </details>
+
+                <!-- Portada y Navegación -->
+                <details>
+                    <summary>Portada y Navegación</summary>
+                    <div class="control-group"><label for="hero_title">Título Principal</label><input type="text" id="hero_title" name="hero_title"></div>
+                    <div class="control-group"><label for="hero_subtitle">Subtítulo</label><input type="text" id="hero_subtitle" name="hero_subtitle"></div>
+                    <div class="grid-2-col">
+                        <div class="control-group"><label for="nav_quienes_somos">Menú: Quiénes Somos</label><input type="text" id="nav_quienes_somos" name="nav_quienes_somos"></div>
+                        <div class="control-group"><label for="nav_servicios">Menú: Servicios</label><input type="text" id="nav_servicios" name="nav_servicios"></div>
+                        <div class="control-group"><label for="nav_proyectos">Menú: Proyectos</label><input type="text" id="nav_proyectos" name="nav_proyectos"></div>
+                        <div class="control-group"><label for="nav_contacto">Menú: Contacto</label><input type="text" id="nav_contacto" name="nav_contacto"></div>
+                    </div>
+                </details>
+
+                <!-- Nuestra Identidad -->
+                <details>
+                    <summary>Nuestra Identidad</summary>
+                    <div class="control-group"><label for="identidad_title">Título de Sección</label><input type="text" id="identidad_title" name="identidad_title"></div>
+                    <div class="control-group"><label for="identidad_subtitle">Subtítulo de Sección</label><input type="text" id="identidad_subtitle" name="identidad_subtitle"></div>
+                    <hr class="my-4 border-gray-700">
+                    <div class="control-group"><label for="identidad_card1_title">Título Tarjeta 1</label><input type="text" id="identidad_card1_title" name="identidad_card1_title"></div>
+                    <div class="control-group"><label for="identidad_card1_p">Párrafo Tarjeta 1</label><textarea id="identidad_card1_p" name="identidad_card1_p" rows="4"></textarea></div>
+                    <hr class="my-4 border-gray-700">
+                    <div class="control-group"><label for="identidad_card2_title">Título Tarjeta 2</label><input type="text" id="identidad_card2_title" name="identidad_card2_title"></div>
+                    <div class="control-group"><label for="identidad_card2_p">Párrafo Tarjeta 2</label><textarea id="identidad_card2_p" name="identidad_card2_p" rows="4"></textarea></div>
+                    <hr class="my-4 border-gray-700">
+                    <div class="control-group"><label for="identidad_card3_title">Título Tarjeta 3</label><input type="text" id="identidad_card3_title" name="identidad_card3_title"></div>
+                    <div class="control-group"><label for="identidad_card3_p">Párrafo Tarjeta 3</label><textarea id="identidad_card3_p" name="identidad_card3_p" rows="4"></textarea></div>
+                </details>
+
+                <!-- Pilares -->
+                <details>
+                    <summary>Nuestros Pilares</summary>
+                    <div class="control-group"><label for="pilares_title">Título de Sección</label><input type="text" id="pilares_title" name="pilares_title"></div>
+                    <div class="grid-2-col">
+                        <div class="control-group"><label for="pilares_card1_title">Título Pilar 1</label><input type="text" id="pilares_card1_title" name="pilares_card1_title"></div>
+                        <div class="control-group"><label for="pilares_card1_p">Texto Pilar 1</label><textarea id="pilares_card1_p" name="pilares_card1_p" rows="3"></textarea></div>
+                        <div class="control-group"><label for="pilares_card2_title">Título Pilar 2</label><input type="text" id="pilares_card2_title" name="pilares_card2_title"></div>
+                        <div class="control-group"><label for="pilares_card2_p">Texto Pilar 2</label><textarea id="pilares_card2_p" name="pilares_card2_p" rows="3"></textarea></div>
+                        <div class="control-group"><label for="pilares_card3_title">Título Pilar 3</label><input type="text" id="pilares_card3_title" name="pilares_card3_title"></div>
+                        <div class="control-group"><label for="pilares_card3_p">Texto Pilar 3</label><textarea id="pilares_card3_p" name="pilares_card3_p" rows="3"></textarea></div>
+                        <div class="control-group"><label for="pilares_card4_title">Título Pilar 4</label><input type="text" id="pilares_card4_title" name="pilares_card4_title"></div>
+                        <div class="control-group"><label for="pilares_card4_p">Texto Pilar 4</label><textarea id="pilares_card4_p" name="pilares_card4_p" rows="3"></textarea></div>
+                    </div>
+                </details>
+
+                <!-- Servicios -->
+                <details>
+                    <summary>Servicios</summary>
+                    <div class="control-group"><label for="servicios_title">Título Sección</label><input type="text" id="servicios_title" name="servicios_title"></div>
+                    <div class="control-group"><label for="servicios_p">Párrafo Sección</label><textarea id="servicios_p" name="servicios_p" rows="2"></textarea></div>
+                    <hr class="my-4 border-gray-700">
+                    <div class="grid-2-col">
+                        <div class="control-group"><label for="servicios_card1_title">Título Tarjeta 1</label><input type="text" id="servicios_card1_title" name="servicios_card1_title"></div>
+                        <div class="control-group"><label for="servicios_card1_list">Lista Tarjeta 1</label><textarea id="servicios_card1_list" name="servicios_card1_list" rows="4"></textarea></div>
+                        <div class="control-group"><label for="servicios_card2_title">Título Tarjeta 2</label><input type="text" id="servicios_card2_title" name="servicios_card2_title"></div>
+                        <div class="control-group"><label for="servicios_card2_list">Lista Tarjeta 2</label><textarea id="servicios_card2_list" name="servicios_card2_list" rows="4"></textarea></div>
+                        <div class="control-group"><label for="servicios_card3_title">Título Tarjeta 3</label><input type="text" id="servicios_card3_title" name="servicios_card3_title"></div>
+                        <div class="control-group"><label for="servicios_card3_list">Lista Tarjeta 3</label><textarea id="servicios_card3_list" name="servicios_card3_list" rows="4"></textarea></div>
+                        <div class="control-group"><label for="servicios_card4_title">Título Tarjeta 4</label><input type="text" id="servicios_card4_title" name="servicios_card4_title"></div>
+                        <div class="control-group"><label for="servicios_card4_list">Lista Tarjeta 4</label><textarea id="servicios_card4_list" name="servicios_card4_list" rows="4"></textarea></div>
+                        <div class="control-group"><label for="servicios_card5_title">Título Tarjeta 5</label><input type="text" id="servicios_card5_title" name="servicios_card5_title"></div>
+                        <div class="control-group"><label for="servicios_card5_list">Lista Tarjeta 5</label><textarea id="servicios_card5_list" name="servicios_card5_list" rows="4"></textarea></div>
+                        <div class="control-group"><label for="servicios_card6_title">Título Tarjeta 6</label><input type="text" id="servicios_card6_title" name="servicios_card6_title"></div>
+                        <div class="control-group"><label for="servicios_card6_list">Lista Tarjeta 6</label><textarea id="servicios_card6_list" name="servicios_card6_list" rows="4"></textarea></div>
+                        <div class="control-group"><label for="servicios_card7_title">Título Tarjeta 7</label><input type="text" id="servicios_card7_title" name="servicios_card7_title"></div>
+                        <div class="control-group"><label for="servicios_card7_list">Lista Tarjeta 7</label><textarea id="servicios_card7_list" name="servicios_card7_list" rows="4"></textarea></div>
+                        <div class="control-group"><label for="servicios_card8_title">Título Tarjeta 8</label><input type="text" id="servicios_card8_title" name="servicios_card8_title"></div>
+                        <div class="control-group"><label for="servicios_card8_list">Lista Tarjeta 8</label><textarea id="servicios_card8_list" name="servicios_card8_list" rows="4"></textarea></div>
+                        <div class="control-group"><label for="servicios_card9_title">Título Tarjeta 9</label><input type="text" id="servicios_card9_title" name="servicios_card9_title"></div>
+                        <div class="control-group"><label for="servicios_card9_list">Lista Tarjeta 9</label><textarea id="servicios_card9_list" name="servicios_card9_list" rows="4"></textarea></div>
+                    </div>
+                </details>
+
+                <!-- Proyectos -->
+                <details>
+                    <summary>Proyectos Ejecutados</summary>
+                    <div class="control-group"><label for="proyectos_title">Título Sección</label><input type="text" id="proyectos_title" name="proyectos_title"></div>
+                    <hr class="my-4 border-gray-700">
+                    <div class="grid-2-col">
+                        <div class="control-group"><label for="proyectos_card1_title">Título Proyecto 1</label><input type="text" id="proyectos_card1_title" name="proyectos_card1_title"></div>
+                        <div class="control-group"><label for="proyectos_card1_p">Texto Proyecto 1</label><textarea id="proyectos_card1_p" name="proyectos_card1_p" rows="3"></textarea></div>
+                        <div class="control-group"><label for="proyectos_card2_title">Título Proyecto 2</label><input type="text" id="proyectos_card2_title" name="proyectos_card2_title"></div>
+                        <div class="control-group"><label for="proyectos_card2_p">Texto Proyecto 2</label><textarea id="proyectos_card2_p" name="proyectos_card2_p" rows="3"></textarea></div>
+                        <div class="control-group"><label for="proyectos_card3_title">Título Proyecto 3</label><input type="text" id="proyectos_card3_title" name="proyectos_card3_title"></div>
+                        <div class="control-group"><label for="proyectos_card3_p">Texto Proyecto 3</label><textarea id="proyectos_card3_p" name="proyectos_card3_p" rows="3"></textarea></div>
+                        <div class="control-group"><label for="proyectos_card4_title">Título Proyecto 4</label><input type="text" id="proyectos_card4_title" name="proyectos_card4_title"></div>
+                        <div class="control-group"><label for="proyectos_card4_p">Texto Proyecto 4</label><textarea id="proyectos_card4_p" name="proyectos_card4_p" rows="3"></textarea></div>
+                        <div class="control-group"><label for="proyectos_card5_title">Título Proyecto 5</label><input type="text" id="proyectos_card5_title" name="proyectos_card5_title"></div>
+                        <div class="control-group"><label for="proyectos_card5_p">Texto Proyecto 5</label><textarea id="proyectos_card5_p" name="proyectos_card5_p" rows="3"></textarea></div>
+                    </div>
+                </details>
+
+                <!-- Equipo -->
+                <details>
+                    <summary>Equipo</summary>
+                    <div class="control-group"><label for="equipo_title">Título Sección</label><input type="text" id="equipo_title" name="equipo_title"></div>
+                    <div class="grid-2-col">
+                        <div class="control-group"><label for="equipo_miembro1_name">Nombre Miembro 1</label><input type="text" id="equipo_miembro1_name" name="equipo_miembro1_name"></div>
+                        <div class="control-group"><label for="equipo_miembro1_role">Cargo Miembro 1</label><input type="text" id="equipo_miembro1_role" name="equipo_miembro1_role"></div>
+                        <div class="control-group"><label for="equipo_miembro2_name">Nombre Miembro 2</label><input type="text" id="equipo_miembro2_name" name="equipo_miembro2_name"></div>
+                        <div class="control-group"><label for="equipo_miembro2_role">Cargo Miembro 2</label><input type="text" id="equipo_miembro2_role" name="equipo_miembro2_role"></div>
+                        <div class="control-group"><label for="equipo_miembro3_name">Nombre Miembro 3</label><input type="text" id="equipo_miembro3_name" name="equipo_miembro3_name"></div>
+                        <div class="control-group"><label for="equipo_miembro3_role">Cargo Miembro 3</label><input type="text" id="equipo_miembro3_role" name="equipo_miembro3_role"></div>
+                    </div>
+                </details>
+
+                <!-- Contacto -->
+                <details>
+                    <summary>Contacto (Pie de página)</summary>
+                    <div class="control-group"><label for="footer_brand">Marca</label><input type="text" id="footer_brand" name="footer_brand"></div>
+                    <div class="control-group"><label for="footer_contact_title">Título Contacto</label><input type="text" id="footer_contact_title" name="footer_contact_title"></div>
+                    <div class="control-group"><label for="footer_contact_email">Email</label><input type="text" id="footer_contact_email" name="footer_contact_email"></div>
+                    <div class="control-group"><label for="footer_contact_phone">Teléfono</label><input type="text" id="footer_contact_phone" name="footer_contact_phone"></div>
+                    <div class="control-group"><label for="footer_location_title">Título Ubicación</label><input type="text" id="footer_location_title" name="footer_location_title"></div>
+                    <div class="control-group"><label for="footer_location_address">Dirección</label><input type="text" id="footer_location_address" name="footer_location_address"></div>
+                </details>
 
                 <hr class="my-6 border-gray-700">
                 <div class="flex justify-between items-center mt-6">
-                    <button type="button" id="reset-button" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-bold rounded-lg transition">Restaurar</button>
+                    <button type="button" id="reset-button" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-bold rounded-lg transition">Restaurar Todo</button>
                     <button type="button" id="save-button" class="px-6 py-2 bg-cyan-500 hover:bg-cyan-600 text-black font-bold rounded-lg transition">Guardar Cambios</button>
                 </div>
             </form>
