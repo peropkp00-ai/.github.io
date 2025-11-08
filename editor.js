@@ -1,12 +1,13 @@
 // editor.js
 import { animationConfig } from './config.js';
+import { contentConfig } from './content-config.js';
 
 document.addEventListener('DOMContentLoaded', () => {
-    // Referencia al objeto de configuración por defecto
-    const defaultConfig = animationConfig;
-    const storageKey = 'userAnimationConfig';
+    const defaultAnimConfig = animationConfig;
+    const defaultContentConfig = contentConfig;
+    const animStorageKey = 'userAnimationConfig';
+    const contentStorageKey = 'userContentConfig';
 
-    // Elementos del DOM
     const form = document.getElementById('editor-form');
     const iframe = document.getElementById('preview-iframe');
     const inputs = {
@@ -16,6 +17,9 @@ document.addEventListener('DOMContentLoaded', () => {
         colorA: document.getElementById('colorA'),
         colorB: document.getElementById('colorB'),
         colorInteraction: document.getElementById('colorInteraction'),
+        quienesSomos: document.getElementById('quienesSomos'),
+        nuestraMision: document.getElementById('nuestraMision'),
+        nuestraVision: document.getElementById('nuestraVision'),
     };
     const valueDisplays = {
         mouseFollowSpeed: document.getElementById('mouseFollowSpeed-value'),
@@ -25,91 +29,101 @@ document.addEventListener('DOMContentLoaded', () => {
     const saveButton = document.getElementById('save-button');
     const resetButton = document.getElementById('reset-button');
 
-    // --- Funciones ---
-
-    /**
-     * Carga la configuración desde localStorage o usa los valores por defecto.
-     */
-    function loadSettings() {
+    function loadSettings(key, defaultConfig) {
         try {
-            const savedSettings = localStorage.getItem(storageKey);
+            const savedSettings = localStorage.getItem(key);
             return savedSettings ? { ...defaultConfig, ...JSON.parse(savedSettings) } : { ...defaultConfig };
         } catch (error) {
-            console.error("Error al cargar la configuración:", error);
+            console.error(`Error al cargar la configuración para ${key}:`, error);
             return { ...defaultConfig };
         }
     }
 
-    /**
-     * Rellena el formulario con los valores de una configuración dada.
-     */
-    function populateForm(config) {
-        for (const key in config) {
+    function populateForm(animConfig, contentConfig) {
+        const allConfigs = { ...animConfig, ...contentConfig };
+        for (const key in allConfigs) {
             if (inputs[key]) {
-                inputs[key].value = config[key];
+                inputs[key].value = allConfigs[key];
                 if (valueDisplays[key]) {
-                    valueDisplays[key].textContent = config[key];
+                    valueDisplays[key].textContent = allConfigs[key];
                 }
             }
         }
     }
 
-    /**
-     * Guarda la configuración actual del formulario en localStorage y refresca el iframe.
-     */
-    function applyAndSaveChanges() {
-        const currentConfig = {};
+    function applyAndSaveChanges(isInitialLoad = false) {
+        const currentAnimConfig = {};
+        const currentContentConfig = {};
+
         for (const key in inputs) {
-            currentConfig[key] = inputs[key].type === 'range' ? parseFloat(inputs[key].value) : inputs[key].value;
+            const value = inputs[key].type === 'range' ? parseFloat(inputs[key].value) : inputs[key].value;
+            if (key in defaultAnimConfig) {
+                currentAnimConfig[key] = value;
+            } else if (key in defaultContentConfig) {
+                currentContentConfig[key] = value;
+            }
         }
 
         try {
-            // Guardar en localStorage para persistencia
-            localStorage.setItem(storageKey, JSON.stringify(currentConfig));
+            localStorage.setItem(animStorageKey, JSON.stringify(currentAnimConfig));
+            localStorage.setItem(contentStorageKey, JSON.stringify(currentContentConfig));
 
-            // Forzar la recarga del iframe para que tome los nuevos valores
-            if (iframe) {
-                iframe.contentWindow.location.reload();
+            // Si el iframe está listo, actualiza su contenido.
+            if (iframe && iframe.contentWindow && iframe.contentWindow.document) {
+                // Si es un cambio en tiempo real (no la carga inicial), recargamos para aplicar cambios de animación.
+                if (!isInitialLoad && Object.keys(currentAnimConfig).some(k => inputs[k].type !== 'textarea')) {
+                     iframe.contentWindow.location.reload();
+                }
+
+                // Inyectar contenido de texto directamente para una actualización instantánea.
+                const iframeDoc = iframe.contentWindow.document;
+                const contentMap = {
+                    quienesSomos: 'content-quienesSomos',
+                    nuestraMision: 'content-nuestraMision',
+                    nuestraVision: 'content-nuestraVision',
+                };
+                for(const key in contentMap) {
+                    const el = iframeDoc.getElementById(contentMap[key]);
+                    if(el) el.textContent = currentContentConfig[key];
+                }
             }
         } catch (error) {
-            console.error("Error al guardar la configuración:", error);
-            alert('Hubo un error al guardar la configuración.');
+            console.error("Error al guardar o aplicar la configuración:", error);
         }
     }
 
     // --- Inicialización y Event Listeners ---
 
-    const currentSettings = loadSettings();
-    populateForm(currentSettings);
+    const currentAnimSettings = loadSettings(animStorageKey, defaultAnimConfig);
+    const currentContentSettings = loadSettings(contentStorageKey, defaultContentConfig);
+    populateForm(currentAnimSettings, currentContentSettings);
 
-    // Actualizar los displays de los sliders y aplicar cambios en tiempo real
+    // Esperar a que el iframe cargue para la primera actualización
+    iframe.addEventListener('load', () => {
+        applyAndSaveChanges(true); // Carga inicial, no recargar
+    });
+
     form.addEventListener('input', () => {
-        // Actualiza los valores numéricos que se muestran al lado de los sliders
         for (const key in valueDisplays) {
             if (inputs[key] && valueDisplays[key]) {
                 valueDisplays[key].textContent = inputs[key].value;
             }
         }
-        // Guardar y refrescar en cada cambio para una vista previa en tiempo real
         applyAndSaveChanges();
     });
 
-    // Botón de guardar (aunque los cambios ya se aplican en tiempo real,
-    // es bueno tener un botón explícito por si el usuario lo espera)
     saveButton.addEventListener('click', (event) => {
         event.preventDefault();
         applyAndSaveChanges();
-        // Opcional: Mostrar una confirmación sutil en lugar de una alerta
         saveButton.textContent = '¡Guardado!';
         setTimeout(() => { saveButton.textContent = 'Guardar Cambios'; }, 1500);
     });
 
-    // Restaurar valores por defecto
     resetButton.addEventListener('click', () => {
-        if (confirm('¿Estás seguro de que quieres restaurar los valores por defecto?')) {
-            localStorage.removeItem(storageKey);
-            populateForm(defaultConfig);
-            // Aplicar los cambios por defecto inmediatamente
+        if (confirm('¿Estás seguro? Se restaurarán tanto la animación como los textos a sus valores por defecto.')) {
+            localStorage.removeItem(animStorageKey);
+            localStorage.removeItem(contentStorageKey);
+            populateForm(defaultAnimConfig, defaultContentConfig);
             applyAndSaveChanges();
         }
     });
