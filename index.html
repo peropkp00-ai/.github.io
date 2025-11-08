@@ -388,6 +388,20 @@
     <!-- Lógica del WebGL y Animaciones -->
     <script type="module">
         import * as THREE from 'three';
+        import { animationConfig } from './config.js';
+
+        // --- Carga de Configuración ---
+        const defaultConfig = animationConfig || {};
+        const storageKey = 'userAnimationConfig';
+        let settings;
+
+        try {
+            const savedSettings = localStorage.getItem(storageKey);
+            settings = savedSettings ? { ...defaultConfig, ...JSON.parse(savedSettings) } : { ...defaultConfig };
+        } catch (e) {
+            console.error("No se pudo cargar la configuración personalizada, usando valores por defecto.", e);
+            settings = { ...defaultConfig };
+        }
 
         // --- Configuración básica de Three.js ---
         const scene = new THREE.Scene();
@@ -407,48 +421,42 @@
         
         const geometry = new THREE.PlaneGeometry(planeSize, planeSize, planeSegments, planeSegments);
         
-        // Colores del PDF
-        const colorDeepBlue = new THREE.Color(0x0d1a3f);
-        const colorPurple = new THREE.Color(0xa87eff); // #a87eff
-        const colorCyan = new THREE.Color(0x00ffff);   // #00ffff
-
         const material = new THREE.ShaderMaterial({
             uniforms: {
                 u_time: { value: 0.0 },
                 u_scroll: { value: 0.0 },
                 u_mouse: { value: new THREE.Vector2(0, 0) },
-                u_color_a: { value: colorPurple },
-                u_color_b: { value: colorCyan }
+                u_color_a: { value: new THREE.Color(settings.colorA) },
+                u_color_b: { value: new THREE.Color(settings.colorB) },
+                u_color_interaction: { value: new THREE.Color(settings.colorInteraction) },
+                u_mouse_radius: { value: settings.mouseWaveRadius },
+                u_mouse_intensity: { value: settings.mouseWaveIntensity }
             },
             vertexShader: `
                 uniform float u_time;
                 uniform float u_scroll;
                 uniform vec2 u_mouse;
+                uniform float u_mouse_radius;
+                uniform float u_mouse_intensity;
                 
                 varying float v_wave;
                 varying float v_mouse_wave;
                 
-                // Simplex Noise 2D
+                // Simplex Noise 2D (código sin cambios)
                 vec3 mod289(vec3 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
                 vec2 mod289(vec2 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
                 vec3 permute(vec3 x) { return mod289(((x*34.0)+1.0)*x); }
-
                 float snoise(vec2 v) {
-                    const vec4 C = vec4(0.211324865405187,  // (3.0-sqrt(3.0))/6.0
-                                        0.366025403784439,  // 0.5*(sqrt(3.0)-1.0)
-                                        -0.577350269189626, // (1.0-sqrt(3.0))/2.0
-                                        0.024390243902439); // 1.0/41.0
+                    const vec4 C = vec4(0.211324865405187, 0.366025403784439, -0.577350269189626, 0.024390243902439);
                     vec2 i  = floor(v + dot(v, C.yy) );
                     vec2 x0 = v -   i + dot(i, C.xx);
-                    vec2 i1;
-                    i1 = (x0.x > x0.y) ? vec2(1.0, 0.0) : vec2(0.0, 1.0);
+                    vec2 i1 = (x0.x > x0.y) ? vec2(1.0, 0.0) : vec2(0.0, 1.0);
                     vec4 x12 = x0.xyxy + C.xxzz;
                     x12.xy -= i1;
                     i = mod289(i);
                     vec3 p = permute( permute( i.y + vec3(0.0, i1.y, 1.0 )) + i.x + vec3(0.0, i1.x, 1.0 ));
                     vec3 m = max(0.5 - vec3(dot(x0,x0), dot(x12.xy,x12.xy), dot(x12.zw,x12.zw)), 0.0);
-                    m = m*m;
-                    m = m*m;
+                    m = m*m; m = m*m;
                     vec3 x = 2.0 * fract(p * C.www) - 1.0;
                     vec3 h = abs(x) - 0.5;
                     vec3 ox = floor(x + 0.5);
@@ -462,41 +470,33 @@
 
                 void main() {
                     vec3 pos = position;
-                    
-                    // 1. Ola de scroll
                     float scrollWave = 1.0 - smoothstep(0.0, 0.5, abs(pos.y * 0.1 + u_scroll));
-                    
-                    // 2. Ruido sutil para el "flujo"
                     float noise = snoise(vec2(pos.x * 0.1 + u_time * 0.1, pos.y * 0.1 + u_time * 0.1));
 
-                    // 3. Ola del mouse
+                    // Ola del mouse (ahora usa uniforms)
                     float dist = distance(pos.xy, u_mouse);
-                    float mouseWave = 1.0 - smoothstep(0.0, 2.5, dist); // Radio de 2.5 unidades
+                    float mouseWave = 1.0 - smoothstep(0.0, u_mouse_radius, dist);
                     
-                    // 4. Aplicar todo al Z (altura)
-                    pos.z += (scrollWave * 2.0) + (noise * 0.2) + (mouseWave * 3.0);
+                    // Aplicar todo al Z (altura)
+                    pos.z += (scrollWave * 2.0) + (noise * 0.2) + (mouseWave * u_mouse_intensity);
                     
-                    // Pasar intensidades al fragment shader
                     v_wave = scrollWave;
                     v_mouse_wave = mouseWave;
-                    
                     gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);
                 }
             `,
             fragmentShader: `
-                uniform vec3 u_color_a; // Purple
-                uniform vec3 u_color_b; // Cyan
+                uniform vec3 u_color_a;
+                uniform vec3 u_color_b;
+                uniform vec3 u_color_interaction;
                 
                 varying float v_wave;
                 varying float v_mouse_wave;
                 
                 void main() {
-                    // Mezclar colores basado en la ola de scroll
                     vec3 scrollColor = mix(u_color_a, u_color_b, v_wave);
-
-                    // Donde está el mouse, el color se vuelve más brillante (casi blanco)
-                    vec3 finalColor = mix(scrollColor, vec3(1.0, 1.0, 1.0), v_mouse_wave);
-                    
+                    // Ahora usa el color de interacción desde el uniform
+                    vec3 finalColor = mix(scrollColor, u_color_interaction, v_mouse_wave);
                     gl_FragColor = vec4(finalColor, 1.0);
                 }
             `,
@@ -506,25 +506,22 @@
         });
 
         const circuit = new THREE.Mesh(geometry, material);
-        circuit.rotation.x = -0.3; // Inclinarlo un poco
+        circuit.rotation.x = -0.3;
         scene.add(circuit);
 
         // --- Controladores ---
         const lerp = (a, b, t) => (1 - t) * a + t * b;
 
-        // Scroll
         let scrollY = window.scrollY;
         let currentScroll = window.scrollY;
         window.addEventListener('scroll', () => { scrollY = window.scrollY; });
         
-        // Mouse
         const mouse = new THREE.Vector2(0, 0);
         const targetMouse = new THREE.Vector2(0, 0);
         window.addEventListener('mousemove', (event) => {
             mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
             mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
         });
-
 
         // --- Bucle de Animación ---
         const clock = new THREE.Clock();
@@ -533,27 +530,23 @@
             
             const elapsedTime = clock.getElapsedTime();
             
-            // 1. Suavizar scroll
             currentScroll = lerp(currentScroll, scrollY, 0.05);
             const scrollableHeight = document.body.scrollHeight - window.innerHeight;
             const scrollProgress = scrollableHeight > 0 ? currentScroll / scrollableHeight : 0;
             
-            // 2. Suavizar mouse
-            targetMouse.lerp(mouse, 0.1);
+            // Suavizar mouse (ahora usa el valor de configuración)
+            targetMouse.lerp(mouse, settings.mouseFollowSpeed);
 
-            // 3. Convertir coordenadas del mouse al plano 3D
             const vFOV = THREE.MathUtils.degToRad(camera.fov);
             const height = 2 * Math.tan(vFOV / 2) * camera.position.z;
             const width = height * camera.aspect;
             const mouse3D_x = targetMouse.x * (width / 2);
             const mouse3D_y = targetMouse.y * (height / 2);
 
-            // 4. Actualizar uniforms del shader
             material.uniforms.u_scroll.value = lerp(2.5, -2.5, scrollProgress);
             material.uniforms.u_time.value = elapsedTime;
             material.uniforms.u_mouse.value.set(mouse3D_x, mouse3D_y);
 
-            // 5. Mover la cámara sutilmente
             camera.position.x = Math.sin(elapsedTime * 0.1) * 0.5;
             camera.lookAt(0, 0, 0);
 
@@ -570,8 +563,14 @@
         }
         window.addEventListener('resize', onWindowResize);
 
+        // --- Recarga en Cambios ---
+        window.addEventListener('storage', (event) => {
+            if (event.key === storageKey) {
+                window.location.reload();
+            }
+        });
 
-        // --- Reemplazo de imágenes rotas (Logos y Equipo) ---
+        // --- Reemplazo de imágenes rotas ---
         const teamImages = document.querySelectorAll('.hexagon-clip');
         teamImages.forEach((img, i) => {
              const texts = ['P.A.', 'P.N.', 'D.C.'];
