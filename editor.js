@@ -10,17 +10,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const form = document.getElementById('editor-form');
     const iframe = document.getElementById('preview-iframe');
-    const inputs = {
-        mouseFollowSpeed: document.getElementById('mouseFollowSpeed'),
-        mouseWaveRadius: document.getElementById('mouseWaveRadius'),
-        mouseWaveIntensity: document.getElementById('mouseWaveIntensity'),
-        colorA: document.getElementById('colorA'),
-        colorB: document.getElementById('colorB'),
-        colorInteraction: document.getElementById('colorInteraction'),
-        quienesSomos: document.getElementById('quienesSomos'),
-        nuestraMision: document.getElementById('nuestraMision'),
-        nuestraVision: document.getElementById('nuestraVision'),
-    };
+
+    // Lista completa de IDs de los inputs
+    const inputIds = Object.keys(contentConfig).concat(Object.keys(animationConfig));
+    const inputs = {};
+    inputIds.forEach(id => {
+        inputs[id] = document.getElementById(id);
+    });
+
     const valueDisplays = {
         mouseFollowSpeed: document.getElementById('mouseFollowSpeed-value'),
         mouseWaveRadius: document.getElementById('mouseWaveRadius-value'),
@@ -56,6 +53,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const currentContentConfig = {};
 
         for (const key in inputs) {
+            if (!inputs[key]) continue;
             const value = inputs[key].type === 'range' ? parseFloat(inputs[key].value) : inputs[key].value;
             if (key in defaultAnimConfig) {
                 currentAnimConfig[key] = value;
@@ -68,23 +66,32 @@ document.addEventListener('DOMContentLoaded', () => {
             localStorage.setItem(animStorageKey, JSON.stringify(currentAnimConfig));
             localStorage.setItem(contentStorageKey, JSON.stringify(currentContentConfig));
 
-            // Si el iframe está listo, actualiza su contenido.
             if (iframe && iframe.contentWindow && iframe.contentWindow.document) {
-                // Si es un cambio en tiempo real (no la carga inicial), recargamos para aplicar cambios de animación.
-                if (!isInitialLoad && Object.keys(currentAnimConfig).some(k => inputs[k].type !== 'textarea')) {
-                     iframe.contentWindow.location.reload();
+                const iframeDoc = iframe.contentWindow.document;
+                for (const key in currentContentConfig) {
+                    const element = iframeDoc.getElementById(key);
+                    if (element) {
+                         if (key.includes('_list')) {
+                            element.innerHTML = '';
+                            const items = currentContentConfig[key].split('\n');
+                            items.forEach(itemText => {
+                                if (itemText.trim() !== '') {
+                                    const li = iframeDoc.createElement('li');
+                                    li.textContent = itemText;
+                                    element.appendChild(li);
+                                }
+                            });
+                        } else {
+                            element.textContent = currentContentConfig[key];
+                        }
+                    }
                 }
 
-                // Inyectar contenido de texto directamente para una actualización instantánea.
-                const iframeDoc = iframe.contentWindow.document;
-                const contentMap = {
-                    quienesSomos: 'content-quienesSomos',
-                    nuestraMision: 'content-nuestraMision',
-                    nuestraVision: 'content-nuestraVision',
-                };
-                for(const key in contentMap) {
-                    const el = iframeDoc.getElementById(contentMap[key]);
-                    if(el) el.textContent = currentContentConfig[key];
+                const animKeys = Object.keys(currentAnimConfig);
+                const hasAnimChanges = animKeys.some(k => inputs[k] && inputs[k].type !== 'textarea' && inputs[k].type !== 'text');
+
+                if (!isInitialLoad && hasAnimChanges) {
+                     iframe.contentWindow.location.reload();
                 }
             }
         } catch (error) {
@@ -92,15 +99,12 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // --- Inicialización y Event Listeners ---
-
     const currentAnimSettings = loadSettings(animStorageKey, defaultAnimConfig);
     const currentContentSettings = loadSettings(contentStorageKey, defaultContentConfig);
     populateForm(currentAnimSettings, currentContentSettings);
 
-    // Esperar a que el iframe cargue para la primera actualización
     iframe.addEventListener('load', () => {
-        applyAndSaveChanges(true); // Carga inicial, no recargar
+        applyAndSaveChanges(true);
     });
 
     form.addEventListener('input', () => {
@@ -120,7 +124,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     resetButton.addEventListener('click', () => {
-        if (confirm('¿Estás seguro? Se restaurarán tanto la animación como los textos a sus valores por defecto.')) {
+        if (confirm('¿Estás seguro? Se restaurarán todos los valores a los predeterminados.')) {
             localStorage.removeItem(animStorageKey);
             localStorage.removeItem(contentStorageKey);
             populateForm(defaultAnimConfig, defaultContentConfig);
