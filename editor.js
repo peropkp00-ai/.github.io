@@ -28,7 +28,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Generar el editor
     function renderEditor() {
         form.innerHTML = '';
-        currentSchema.forEach(section => {
+        currentSchema.forEach((section, sectionIndex) => {
             const details = document.createElement('details');
             details.open = true;
             details.dataset.sectionIndex = sectionIndex;
