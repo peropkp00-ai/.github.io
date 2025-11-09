@@ -106,7 +106,7 @@ function renderServicesSection(section) {
 export function renderProject(sectionId, project, index) {
     return `
         <div class="glass-card rounded-lg p-8">
-            <img src="${project.clientLogo}" alt="Logo ${project.clientName}" class="h-12 mb-4" onerror="this.src='https://placehold.co/150x50/161b22/c9d1d9?text=${encodeURIComponent(project.clientName)}'; this.onerror=null;">
+            <img id="${sectionId}-projects-${index}-clientLogo" src="${project.clientLogo}" alt="Logo ${project.clientName}" class="h-12 mb-4" onerror="this.src='https://placehold.co/150x50/161b22/c9d1d9?text=${encodeURIComponent(project.clientName)}'; this.onerror=null;">
             <h3 id="${sectionId}-projects-${index}-title" class="text-2xl font-bold text-cyan-300 mb-2">${project.title}</h3>
             <p id="${sectionId}-projects-${index}-description" class="text-gray-300">${project.description}</p>
         </div>
@@ -129,7 +129,7 @@ function renderProjectsSection(section) {
 export function renderTeamMember(sectionId, member, index) {
     return `
         <div>
-            <img src="${member.photo}" class="w-48 h-48 object-cover rounded-full mx-auto hexagon-clip" alt="Foto de ${member.name}">
+            <img id="${sectionId}-members-${index}-photo" src="${member.photo}" class="w-48 h-48 object-cover rounded-full mx-auto hexagon-clip" alt="Foto de ${member.name}">
             <h3 id="${sectionId}-members-${index}-name" class="text-2xl font-bold text-cyan-300 mt-4">${member.name}</h3>
             <p id="${sectionId}-members-${index}-role" class="text-purple-300">${member.role}</p>
         </div>
