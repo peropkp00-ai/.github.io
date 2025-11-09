@@ -26,6 +26,15 @@ function renderHeroSection(section) {
     `;
 }
 
+export function renderIdentityCard(sectionId, card, index) {
+    return `
+        <div class="glass-card p-8 rounded-2xl shadow-2xl">
+            <h3 id="${sectionId}-cards-${index}-title" class="text-2xl font-bold text-purple-300 mb-4">${card.title}</h3>
+            <p id="${sectionId}-cards-${index}-text" class="text-gray-200 leading-relaxed">${card.text}</p>
+        </div>
+    `;
+}
+
 function renderIdentitySection(section) {
     const c = section.content;
     const id = section.id;
@@ -35,15 +44,19 @@ function renderIdentitySection(section) {
                 <h2 id="${id}-title" class="text-4xl font-bold">${c.title}</h2>
                 <p id="${id}-subtitle" class="text-lg text-gray-300 mt-2">${c.subtitle}</p>
             </div>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                ${c.cards.map((card, index) => `
-                    <div class="glass-card p-8 rounded-2xl shadow-2xl">
-                        <h3 id="${id}-cards-${index}-title" class="text-2xl font-bold text-purple-300 mb-4">${card.title}</h3>
-                        <p id="${id}-cards-${index}-text" class="text-gray-200 leading-relaxed">${card.text}</p>
-                    </div>
-                `).join('')}
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 items-container" data-path="${id}-cards">
+                ${c.cards.map((card, index) => renderIdentityCard(id, card, index)).join('')}
             </div>
         </section>
+    `;
+}
+
+export function renderPillar(sectionId, pillar, index) {
+    return `
+        <div class="glass-card p-6 rounded-lg">
+            <h3 id="${sectionId}-pillars-${index}-title" class="text-2xl font-bold text-cyan-300 mb-2">${pillar.title}</h3>
+            <p id="${sectionId}-pillars-${index}-text" class="text-gray-300">${pillar.text}</p>
+        </div>
     `;
 }
 
@@ -53,15 +66,24 @@ function renderPillarsSection(section) {
     return `
         <section class="py-24 px-8 max-w-7xl mx-auto">
             <h2 id="${id}-title" class="text-4xl font-bold text-center mb-16">${c.title}</h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-                ${c.pillars.map((pillar, index) => `
-                    <div class="glass-card p-6 rounded-lg">
-                        <h3 id="${id}-pillars-${index}-title" class="text-2xl font-bold text-cyan-300 mb-2">${pillar.title}</h3>
-                        <p id="${id}-pillars-${index}-text" class="text-gray-300">${pillar.text}</p>
-                    </div>
-                `).join('')}
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 items-container" data-path="${id}-pillars">
+                ${c.pillars.map((pillar, index) => renderPillar(id, pillar, index)).join('')}
             </div>
         </section>
+    `;
+}
+
+export function renderService(sectionId, service, index) {
+    return `
+        <div class="glass-card rounded-lg overflow-hidden h-full shadow-lg">
+            <img src="https://placehold.co/600x400/0d1a3f/a87eff?text=${encodeURIComponent(service.title)}" alt="${service.title}" class="w-full h-40 object-cover">
+            <div class="p-5">
+                <h3 id="${sectionId}-services-${index}-title" class="text-xl font-bold text-purple-300 mb-2">${service.title}</h3>
+                <ul id="${sectionId}-services-${index}-items" class="list-disc list-inside text-gray-300 text-sm">
+                    ${service.items.map(item => `<li>${item}</li>`).join('')}
+                </ul>
+            </div>
+        </div>
     `;
 }
 
@@ -74,20 +96,20 @@ function renderServicesSection(section) {
                 <h2 id="${id}-title" class="text-4xl font-bold mb-6">${c.title}</h2>
                 <p id="${id}-description" class="text-lg text-gray-300 max-w-3xl mb-12">${c.description}</p>
             </div>
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-7xl mx-auto">
-                ${c.services.map((service, index) => `
-                    <div class="glass-card rounded-lg overflow-hidden h-full shadow-lg">
-                        <img src="https://placehold.co/600x400/0d1a3f/a87eff?text=${encodeURIComponent(service.title)}" alt="${service.title}" class="w-full h-40 object-cover">
-                        <div class="p-5">
-                            <h3 id="${id}-services-${index}-title" class="text-xl font-bold text-purple-300 mb-2">${service.title}</h3>
-                            <ul id="${id}-services-${index}-items" class="list-disc list-inside text-gray-300 text-sm">
-                                ${service.items.map(item => `<li>${item}</li>`).join('')}
-                            </ul>
-                        </div>
-                    </div>
-                `).join('')}
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-7xl mx-auto items-container" data-path="${id}-services">
+                ${c.services.map((service, index) => renderService(id, service, index)).join('')}
             </div>
         </section>
+    `;
+}
+
+export function renderProject(sectionId, project, index) {
+    return `
+        <div class="glass-card rounded-lg p-8">
+            <img src="${project.clientLogo}" alt="Logo ${project.clientName}" class="h-12 mb-4" onerror="this.src='https://placehold.co/150x50/161b22/c9d1d9?text=${encodeURIComponent(project.clientName)}'; this.onerror=null;">
+            <h3 id="${sectionId}-projects-${index}-title" class="text-2xl font-bold text-cyan-300 mb-2">${project.title}</h3>
+            <p id="${sectionId}-projects-${index}-description" class="text-gray-300">${project.description}</p>
+        </div>
     `;
 }
 
@@ -97,16 +119,20 @@ function renderProjectsSection(section) {
     return `
         <section id="${id}" class="py-24 px-8 max-w-7xl mx-auto">
             <h2 id="${id}-title" class="text-4xl font-bold text-center mb-16">${c.title}</h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                ${c.projects.map((project, index) => `
-                    <div class="glass-card rounded-lg p-8">
-                        <img src="${project.clientLogo}" alt="Logo ${project.clientName}" class="h-12 mb-4" onerror="this.src='https://placehold.co/150x50/161b22/c9d1d9?text=${encodeURIComponent(project.clientName)}'; this.onerror=null;">
-                        <h3 id="${id}-projects-${index}-title" class="text-2xl font-bold text-cyan-300 mb-2">${project.title}</h3>
-                        <p id="${id}-projects-${index}-description" class="text-gray-300">${project.description}</p>
-                    </div>
-                `).join('')}
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-container" data-path="${id}-projects">
+                ${c.projects.map((project, index) => renderProject(id, project, index)).join('')}
             </div>
         </section>
+    `;
+}
+
+export function renderTeamMember(sectionId, member, index) {
+    return `
+        <div>
+            <img src="${member.photo}" class="w-48 h-48 object-cover rounded-full mx-auto hexagon-clip" alt="Foto de ${member.name}">
+            <h3 id="${sectionId}-members-${index}-name" class="text-2xl font-bold text-cyan-300 mt-4">${member.name}</h3>
+            <p id="${sectionId}-members-${index}-role" class="text-purple-300">${member.role}</p>
+        </div>
     `;
 }
 
@@ -116,14 +142,8 @@ function renderTeamSection(section) {
     return `
         <section class="py-24 px-8 max-w-5xl mx-auto text-center">
             <h2 id="${id}-title" class="text-4xl font-bold text-center mb-16">${c.title}</h2>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                ${c.members.map((member, index) => `
-                    <div>
-                        <img src="${member.photo}" class="w-48 h-48 object-cover rounded-full mx-auto hexagon-clip" alt="Foto de ${member.name}">
-                        <h3 id="${id}-members-${index}-name" class="text-2xl font-bold text-cyan-300 mt-4">${member.name}</h3>
-                        <p id="${id}-members-${index}-role" class="text-purple-300">${member.role}</p>
-                    </div>
-                `).join('')}
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 items-container" data-path="${id}-members">
+                ${c.members.map((member, index) => renderTeamMember(id, member, index)).join('')}
             </div>
         </section>
     `;

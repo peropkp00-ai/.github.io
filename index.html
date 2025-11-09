@@ -73,6 +73,24 @@
                     }
                 }
             },
+            updateAttribute: (elementId, attribute, value) => {
+                const element = document.getElementById(elementId);
+                if (element) {
+                    element[attribute] = value;
+                }
+            },
+            addElement: (containerSelector, itemHtml) => {
+                const container = document.querySelector(containerSelector);
+                if (container) {
+                    container.insertAdjacentHTML('beforeend', itemHtml);
+                }
+            },
+            removeElement: (elementId) => {
+                const element = document.getElementById(elementId);
+                if (element) {
+                    element.parentElement.remove(); // Asumiendo que el elemento a eliminar está envuelto en un div
+                }
+            },
             updateAnimation: (key, value) => {
                 if (material.uniforms[key]) {
                     if (key.toLowerCase().includes('color')) {

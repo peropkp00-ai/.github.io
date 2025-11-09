@@ -2,6 +2,7 @@
 import { pageSchema as defaultSchema } from './page-schema.js';
 import { sectionTemplates } from './section-templates.js';
 import { itemTemplates } from './item-templates.js';
+import * as renderer from './renderer.js';
 
 document.addEventListener('DOMContentLoaded', () => {
     const storageKey = 'userPageSchema';
@@ -158,26 +159,36 @@ document.addEventListener('DOMContentLoaded', () => {
         if(!section) return;
 
         let targetId;
+        let isAttributeUpdate = false;
+        let attribute;
+
         if (itemIndex !== undefined && itemKey !== undefined) { // Campo anidado en objeto
             section.content[key][itemIndex][itemKey] = value;
-            targetId = `${section.id}-${key}-${itemIndex}-${itemKey}`;
+            targetId = `${sectionId}-${key}-${itemIndex}-${itemKey}`;
+            if (itemKey.toLowerCase().includes('photo') || itemKey.toLowerCase().includes('logo')) {
+                isAttributeUpdate = true;
+                attribute = 'src';
+            }
         } else { // Campo simple o textarea de lista
-            // Si el original era un array, convertir el string del textarea de nuevo a array
             if (Array.isArray(section.content[key])) {
                 section.content[key] = value.split('\n');
             } else {
                 section.content[key] = value;
             }
-            targetId = `${section.id}-${key}`;
+            targetId = `${sectionId}-${key}`;
         }
 
         // Actualizar la vista previa en vivo
         if (!liveUpdater) return;
-        const isAnimKey = ['mouseFollowSpeed', 'mouseWaveRadius', 'mouseWaveIntensity', 'colorA', 'colorB', 'colorInteraction'].includes(key);
+        const isAnimKey = ['mouseFollowSpeed', 'mouseWaveRadius', 'mouseWaveIntensity', 'colorA', 'colorB', 'colorInteraction'].includes(key) || ['mouseFollowSpeed', 'mouseWaveRadius', 'mouseWaveIntensity', 'colorA', 'colorB', 'colorInteraction'].includes(itemKey);
 
         if (isAnimKey) {
-            const animProp = key === 'colorA' ? 'u_color_a' : key === 'colorB' ? 'u_color_b' : key === 'colorInteraction' ? 'u_color_interaction' : key === 'mouseWaveRadius' ? 'u_mouse_wave_radius' : key === 'mouseWaveIntensity' ? 'u_mouse_wave_intensity' : key;
-            liveUpdater.updateAnimation(animProp, value);
+            const animProp = itemKey || key;
+            const animValue = value;
+            const uniformName = `u_${animProp}`.replace('colorA', 'color_a').replace('colorB', 'color_b').replace('colorInteraction', 'color_interaction');
+            liveUpdater.updateAnimation(uniformName, animValue);
+        } else if (isAttributeUpdate) {
+            liveUpdater.updateAttribute(targetId.replace('-' + itemKey, ''), attribute, value);
         } else {
             liveUpdater.updateText(targetId, value);
         }
@@ -260,7 +271,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const sectionIndex = target.dataset.sectionIndex;
             if (confirm('¿Estás seguro de que quieres eliminar esta sección?')) {
                 currentSchema.splice(sectionIndex, 1);
-                saveAndRefresh();
+                saveAndRefresh(); // Los cambios de sección aún requieren recarga
             }
         }
 
@@ -270,7 +281,8 @@ document.addEventListener('DOMContentLoaded', () => {
             const section = currentSchema.find(s => s.id === sectionId);
             if (section && confirm('¿Estás seguro de que quieres eliminar este elemento?')) {
                 section.content[key].splice(itemIndex, 1);
-                saveAndRefresh();
+                renderEditor(); // Re-renderizar el editor para actualizar los índices
+                liveUpdater.removeElement(`${sectionId}-${key}-${itemIndex}-title`);
             }
         }
 
@@ -280,8 +292,16 @@ document.addEventListener('DOMContentLoaded', () => {
             const template = target.dataset.template;
             const section = currentSchema.find(s => s.id === sectionId);
             if (section && itemTemplates[template]) {
-                section.content[key].push(itemTemplates[template]());
-                saveAndRefresh();
+                const newItem = itemTemplates[template]();
+                section.content[key].push(newItem);
+                const newItemIndex = section.content[key].length - 1;
+
+                const renderFunctionName = `render${template.charAt(0).toUpperCase() + template.slice(1, -1)}`;
+                if(renderer[renderFunctionName]) {
+                    const newItemHtml = renderer[renderFunctionName](sectionId, newItem, newItemIndex);
+                    liveUpdater.addElement(`[data-path=${sectionId}-${key}]`, newItemHtml);
+                }
+                renderEditor(); // Re-renderizar el editor para que sepa del nuevo item
             }
         }
     });
