@@ -194,7 +194,10 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         // Actualizar la vista previa en vivo
-        if (!liveUpdater) return;
+        if (!liveUpdater) {
+            return;
+        }
+
         const isAnimKey = ['mouseFollowSpeed', 'mouseWaveRadius', 'mouseWaveIntensity', 'colorA', 'colorB', 'colorInteraction'].includes(key) || ['mouseFollowSpeed', 'mouseWaveRadius', 'mouseWaveIntensity', 'colorA', 'colorB', 'colorInteraction'].includes(itemKey);
 
         if (isAnimKey) {
@@ -225,8 +228,8 @@ document.addEventListener('DOMContentLoaded', () => {
         if (confirm('¿Estás seguro?')) {
             localStorage.removeItem(storageKey);
             loadSchema();
-            renderEditor();
-            iframe.contentWindow.location.reload();
+            // Forzar un refresco completo para asegurar la restauración
+            saveAndRefresh();
         }
     });
 
@@ -244,19 +247,15 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Refrescar toda la UI (editor y vista previa)
-    function refreshUI() {
-        renderEditor();
-        iframe.contentWindow.location.reload();
-    }
-
     // Guardar el estado actual y luego refrescar la UI
     function saveAndRefresh() {
         try {
             localStorage.setItem(storageKey, JSON.stringify(currentSchema));
-            refreshUI();
+            renderEditor();
+            initSortable();
+            iframe.contentWindow.location.reload();
         } catch (e) {
-            console.error("Error al guardar antes de refrescar.", e);
+            console.error("Error al guardar y refrescar.", e);
         }
     }
 
@@ -270,7 +269,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const type = event.target.dataset.type;
         if (type && sectionTemplates[type]) {
             currentSchema.push(sectionTemplates[type]());
-            saveAndRefresh();
+            saveAndRefresh(); // Recarga completa necesaria para una nueva sección
             addSectionMenu.classList.add('hidden');
         }
     });
@@ -286,7 +285,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const sectionIndex = target.dataset.sectionIndex;
             if (confirm('¿Estás seguro de que quieres eliminar esta sección?')) {
                 currentSchema.splice(sectionIndex, 1);
-                saveAndRefresh(); // Los cambios de sección aún requieren recarga
+                saveAndRefresh(); // Recarga completa necesaria
             }
         }
 
@@ -296,8 +295,9 @@ document.addEventListener('DOMContentLoaded', () => {
             const section = currentSchema.find(s => s.id === sectionId);
             if (section && confirm('¿Estás seguro de que quieres eliminar este elemento?')) {
                 section.content[key].splice(itemIndex, 1);
-                renderEditor(); // Re-renderizar el editor para actualizar los índices
-                liveUpdater.removeElement(`${sectionId}-${key}-${itemIndex}-title`);
+                renderEditor(); // Solo re-renderizar el editor
+                initSortable();
+                liveUpdater.removeElement(`${sectionId}-${key}-${itemIndex}-name`); // Asumimos que el 'name' es un buen ancla
             }
         }
 
@@ -311,12 +311,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 section.content[key].push(newItem);
                 const newItemIndex = section.content[key].length - 1;
 
-                const renderFunctionName = `render${template.charAt(0).toUpperCase() + template.slice(1, -1)}`;
-                if(renderer[renderFunctionName]) {
+                const renderFunctionName = `render${template.charAt(0).toUpperCase() + template.slice(0, -1)}`;
+                if (renderer[renderFunctionName]) {
                     const newItemHtml = renderer[renderFunctionName](sectionId, newItem, newItemIndex);
-                    liveUpdater.addElement(`[data-path=${sectionId}-${key}]`, newItemHtml);
+                    liveUpdater.addElement(`[data-path="${sectionId}-${key}"]`, newItemHtml);
                 }
-                renderEditor(); // Re-renderizar el editor para que sepa del nuevo item
+                renderEditor();
+                initSortable();
             }
         }
     });
@@ -332,7 +333,7 @@ document.addEventListener('DOMContentLoaded', () => {
             onEnd: (event) => {
                 const movedItem = currentSchema.splice(event.oldIndex, 1)[0];
                 currentSchema.splice(event.newIndex, 0, movedItem);
-                saveAndRefresh();
+                refreshUI();
             }
         });
 
@@ -341,6 +342,7 @@ document.addEventListener('DOMContentLoaded', () => {
             new Sortable(container, {
                 animation: 150,
                 handle: '.drag-handle',
+                draggable: '.item-details', // Especificar qué elementos son arrastrables
                 onEnd: (event) => {
                     const path = container.dataset.path.split('-');
                     const [sectionId, key] = path;
@@ -348,7 +350,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     if(section) {
                         const movedItem = section.content[key].splice(event.oldIndex, 1)[0];
                         section.content[key].splice(event.newIndex, 0, movedItem);
-                        saveAndRefresh();
+                        refreshUI();
                     }
                 }
             });
