@@ -59,12 +59,12 @@
             renderPage(currentSchema, container);
         }
 
-        // --- API de Actualización en Vivo ---
+        // --- API de Actualización en Vivo (Enfoque Granular) ---
         window.liveUpdater = {
             updateText: (elementId, newText) => {
                 const element = document.getElementById(elementId);
                 if (element) {
-                    if (element.tagName === 'UL' || element.id.endsWith('-items')) {
+                    if (element.tagName === 'UL') {
                         element.innerHTML = newText.split('\n').map(item => `<li>${item}</li>`).join('');
                     } else {
                         element.textContent = newText;
@@ -74,7 +74,7 @@
             updateAttribute: (elementId, attribute, value) => {
                 const element = document.getElementById(elementId);
                 if (element) {
-                    element[attribute] = value;
+                    element.setAttribute(attribute, value);
                 }
             },
             addElement: (containerSelector, itemHtml) => {
@@ -85,19 +85,21 @@
             },
             removeElement: (elementId) => {
                 const element = document.getElementById(elementId);
+                // Busca el contenedor del item más cercano para eliminarlo
                 if (element) {
-                    element.parentElement.remove(); // Asumiendo que el elemento a eliminar está envuelto en un div
+                    const itemWrapper = element.closest('.glass-card, .hexagon-clip');
+                    if (itemWrapper) itemWrapper.remove();
                 }
             },
-            updateAnimation: (key, value) => {
-                if (material.uniforms[key]) {
-                    if (key.toLowerCase().includes('color')) {
-                        material.uniforms[key].value.set(value);
+            updateAnimation: (uniformName, value) => {
+                if (material && material.uniforms[uniformName]) {
+                    if (uniformName.toLowerCase().includes('color')) {
+                        material.uniforms[uniformName].value.set(value);
                     } else {
-                        material.uniforms[key].value = value;
+                        material.uniforms[uniformName].value = value;
                     }
                 }
-                if (key === 'mouseFollowSpeed') {
+                if (uniformName === 'u_mouseFollowSpeed') {
                     settings.mouseFollowSpeed = value;
                 }
             }
