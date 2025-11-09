@@ -31,7 +31,6 @@ document.addEventListener('DOMContentLoaded', () => {
         form.innerHTML = '';
         currentSchema.forEach((section, sectionIndex) => {
             const details = document.createElement('details');
-            details.open = true;
             details.dataset.sectionIndex = sectionIndex;
 
             const summary = document.createElement('summary');
@@ -51,7 +50,7 @@ document.addEventListener('DOMContentLoaded', () => {
             deleteBtn.dataset.sectionIndex = sectionIndex;
             controls.appendChild(deleteBtn);
 
-            details.appendChild(controls);
+            summary.appendChild(controls);
             details.appendChild(summary);
 
             const contentWrapper = document.createElement('div');
@@ -72,11 +71,20 @@ document.addEventListener('DOMContentLoaded', () => {
                         createField(contentWrapper, path, key, listAsString);
                     } else { // Si es un array de objetos, renderizar los campos para cada objeto.
                         value.forEach((item, itemIndex) => {
-                            const itemGroup = document.createElement('div');
-                            itemGroup.className = 'p-2 border border-gray-700 rounded mb-2 relative';
+                            const itemDetails = document.createElement('details');
+                            itemDetails.className = 'item-details bg-gray-800 rounded mb-2';
+
+                            const itemSummary = document.createElement('summary');
+                            itemSummary.className = 'flex justify-between items-center p-2 cursor-pointer';
+
+                            // Usar el primer valor de texto (título, nombre, etc.) como etiqueta del resumen
+                            const summaryLabel = Object.values(item)[0] || 'Elemento';
+                            const summaryText = document.createElement('span');
+                            summaryText.textContent = `${key.slice(0, -1)}: ${summaryLabel}`;
+                            itemSummary.appendChild(summaryText);
 
                             const itemControls = document.createElement('div');
-                            itemControls.className = 'section-controls';
+                            itemControls.className = 'item-controls';
                             const itemMoveHandle = document.createElement('button');
                             itemMoveHandle.innerHTML = '&#9776;';
                             itemMoveHandle.className = 'drag-handle';
@@ -86,14 +94,19 @@ document.addEventListener('DOMContentLoaded', () => {
                             itemDeleteBtn.dataset.path = `${path}-${itemIndex}`;
                             itemControls.appendChild(itemMoveHandle);
                             itemControls.appendChild(itemDeleteBtn);
-                            itemGroup.appendChild(itemControls);
+                            itemSummary.appendChild(itemControls);
+                            itemDetails.appendChild(itemSummary);
+
+                            const itemContentWrapper = document.createElement('div');
+                            itemContentWrapper.className = 'p-3 border-t border-gray-700';
 
                             for (const itemKey in item) {
                                 if (typeof item[itemKey] !== 'object') {
-                                    createField(itemGroup, `${path}-${itemIndex}-${itemKey}`, itemKey, item[itemKey]);
+                                    createField(itemContentWrapper, `${path}-${itemIndex}-${itemKey}`, itemKey, item[itemKey]);
                                 }
                             }
-                            itemsContainer.appendChild(itemGroup);
+                            itemDetails.appendChild(itemContentWrapper);
+                            itemsContainer.appendChild(itemDetails);
                         });
                         contentWrapper.appendChild(itemsContainer);
 
@@ -122,6 +135,7 @@ document.addEventListener('DOMContentLoaded', () => {
         group.className = 'control-group';
         const labelEl = document.createElement('label');
         labelEl.textContent = label;
+        labelEl.htmlFor = path; // Asociar la etiqueta con el input
         group.appendChild(labelEl);
 
         let input;
@@ -133,6 +147,7 @@ document.addEventListener('DOMContentLoaded', () => {
             input.min = 0; input.max = (label.includes('Speed')) ? 1 : 10; input.step = 0.1;
         }
 
+        input.id = path; // Añadir id para la asociación de la etiqueta
         input.value = value;
         input.dataset.path = path;
         group.appendChild(input);
@@ -188,7 +203,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const uniformName = `u_${animProp}`.replace('colorA', 'color_a').replace('colorB', 'color_b').replace('colorInteraction', 'color_interaction');
             liveUpdater.updateAnimation(uniformName, animValue);
         } else if (isAttributeUpdate) {
-            liveUpdater.updateAttribute(targetId.replace('-' + itemKey, ''), attribute, value);
+            liveUpdater.updateAttribute(targetId, attribute, value);
         } else {
             liveUpdater.updateText(targetId, value);
         }
