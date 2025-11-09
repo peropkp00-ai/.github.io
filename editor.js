@@ -1,10 +1,10 @@
 // editor.js
 import { animationConfig } from './config.js';
-import { contentConfig } from './content-config.js';
 
 document.addEventListener('DOMContentLoaded', () => {
     const defaultAnimConfig = animationConfig;
-    const defaultContentConfig = contentConfig;
+    // contentConfig ya no se usa, será reemplazado por el pageSchema en la Fase 2
+    const defaultContentConfig = {};
     const animStorageKey = 'userAnimationConfig';
     const contentStorageKey = 'userContentConfig';
 
