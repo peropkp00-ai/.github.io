@@ -83,12 +83,21 @@ document.addEventListener('DOMContentLoaded', () => {
                         itemControls.appendChild(itemDeleteBtn);
                         itemGroup.appendChild(itemControls);
 
-                        for (const itemKey in item) {
-                            if (typeof item[itemKey] !== 'object') {
-                                createField(itemGroup, `${path}-${itemIndex}-${itemKey}`, itemKey, item[itemKey]);
+                        // Manejar arrays de strings (como en servicios) de forma diferente a arrays de objetos
+                        if (typeof item === 'string') {
+                            // Si es el primer item, crear el textarea para toda la lista
+                            if (itemIndex === 0) {
+                                const listAsString = value.join('\n');
+                                createField(itemsContainer, `${path}`, key, listAsString);
                             }
+                        } else { // Para arrays de objetos
+                            for (const itemKey in item) {
+                                if (typeof item[itemKey] !== 'object') {
+                                    createField(itemGroup, `${path}-${itemIndex}-${itemKey}`, itemKey, item[itemKey]);
+                                }
+                            }
+                            itemsContainer.appendChild(itemGroup);
                         }
-                        itemsContainer.appendChild(itemGroup);
                     });
 
                     contentWrapper.appendChild(itemsContainer);
@@ -154,11 +163,16 @@ document.addEventListener('DOMContentLoaded', () => {
         if(!section) return;
 
         let targetId;
-        if (itemIndex !== undefined && itemKey !== undefined) {
+        if (itemIndex !== undefined && itemKey !== undefined) { // Campo anidado en objeto
             section.content[key][itemIndex][itemKey] = value;
             targetId = `${section.id}-${key}-${itemIndex}-${itemKey}`;
-        } else {
-            section.content[key] = value;
+        } else { // Campo simple o textarea de lista
+            // Si el original era un array, convertir el string del textarea de nuevo a array
+            if (Array.isArray(section.content[key])) {
+                section.content[key] = value.split('\n');
+            } else {
+                section.content[key] = value;
+            }
             targetId = `${section.id}-${key}`;
         }
 
