@@ -1,5 +1,6 @@
 // editor.js
 import { pageSchema as defaultSchema } from './page-schema.js';
+import { sectionTemplates } from './section-templates.js';
 
 document.addEventListener('DOMContentLoaded', () => {
     const storageKey = 'userPageSchema';
@@ -7,6 +8,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const iframe = document.getElementById('preview-iframe');
     const saveButton = document.getElementById('save-button');
     const resetButton = document.getElementById('reset-button');
+    const addSectionBtn = document.getElementById('add-section-btn');
+    const addSectionMenu = document.getElementById('add-section-menu');
 
     let currentSchema;
     let liveUpdater; // Referencia a la API del iframe
@@ -27,9 +30,29 @@ document.addEventListener('DOMContentLoaded', () => {
         currentSchema.forEach(section => {
             const details = document.createElement('details');
             details.open = true;
+            details.dataset.sectionIndex = sectionIndex;
+
             const summary = document.createElement('summary');
             summary.textContent = section.type.charAt(0).toUpperCase() + section.type.slice(1);
+
+            const controls = document.createElement('div');
+            controls.className = 'section-controls';
+
+            const moveHandle = document.createElement('button');
+            moveHandle.innerHTML = '&#9776;'; // Icono de hamburguesa para mover
+            moveHandle.className = 'drag-handle';
+            controls.appendChild(moveHandle);
+
+            const deleteBtn = document.createElement('button');
+            deleteBtn.innerHTML = '&#10005;'; // Icono de X para eliminar
+            deleteBtn.dataset.sectionIndex = sectionIndex;
+            controls.appendChild(deleteBtn);
+
+            details.appendChild(controls);
             details.appendChild(summary);
+
+            const contentWrapper = document.createElement('div');
+            contentWrapper.className = 'p-4';
 
             for (const key in section.content) {
                 const value = section.content[key];
@@ -47,9 +70,10 @@ document.addEventListener('DOMContentLoaded', () => {
                         details.appendChild(itemGroup);
                     });
                 } else { // Campos simples
-                    createField(details, path, key, value);
+                    createField(contentWrapper, path, key, value);
                 }
             }
+            details.appendChild(contentWrapper);
             form.appendChild(details);
         });
     }
@@ -138,11 +162,79 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Iniciar
+    // --- Lógica de Gestión de Secciones ---
+
+    // Poblar el menú de "Añadir Sección"
+    function populateAddSectionMenu() {
+        addSectionMenu.innerHTML = '';
+        Object.keys(sectionTemplates).forEach(type => {
+            const button = document.createElement('button');
+            button.className = 'block w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-gray-700';
+            button.textContent = type.charAt(0).toUpperCase() + type.slice(1);
+            button.dataset.type = type;
+            addSectionMenu.appendChild(button);
+        });
+    }
+
+    // Refrescar toda la UI (editor y vista previa)
+    function refreshUI() {
+        renderEditor();
+        iframe.contentWindow.location.reload();
+    }
+
+    // Evento para mostrar/ocultar el menú de añadir
+    addSectionBtn.addEventListener('click', () => {
+        addSectionMenu.classList.toggle('hidden');
+    });
+
+    // Evento para añadir una nueva sección desde el menú
+    addSectionMenu.addEventListener('click', (event) => {
+        const type = event.target.dataset.type;
+        if (type && sectionTemplates[type]) {
+            currentSchema.push(sectionTemplates[type]());
+            refreshUI();
+            addSectionMenu.classList.add('hidden');
+        }
+    });
+
+    // Evento para eliminar una sección
+    form.addEventListener('click', (event) => {
+        if (event.target.innerHTML === '✖') { // Botón de eliminar
+            const sectionIndex = event.target.dataset.sectionIndex;
+            if (confirm('¿Estás seguro de que quieres eliminar esta sección?')) {
+                currentSchema.splice(sectionIndex, 1);
+                refreshUI();
+            }
+        }
+    });
+
+
+    // --- Lógica de Drag-and-Drop ---
+
+    function initSortable() {
+        new Sortable(form, {
+            animation: 150,
+            handle: '.drag-handle', // Usar el "handle" para arrastrar
+            onEnd: (event) => {
+                // Mover el elemento en el array del esquema
+                const movedItem = currentSchema.splice(event.oldIndex, 1)[0];
+                currentSchema.splice(event.newIndex, 0, movedItem);
+
+                // Refrescar la UI para asegurar la consistencia y actualizar la vista previa
+                refreshUI();
+            }
+        });
+    }
+
+
+    // --- Inicialización ---
+
     iframe.addEventListener('load', () => {
         liveUpdater = iframe.contentWindow.liveUpdater;
     });
 
     loadSchema();
     renderEditor();
+    populateAddSectionMenu();
+    initSortable();
 });
