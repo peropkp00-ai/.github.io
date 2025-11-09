@@ -62,54 +62,49 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 if (Array.isArray(value)) { // Campos anidados (listas de elementos)
                     const itemsContainer = document.createElement('div');
-                    itemsContainer.className = 'items-container'; // Clase explícita para SortableJS
-                    itemsContainer.dataset.path = path; // Ruta para añadir/reordenar
+                    itemsContainer.className = 'items-container';
+                    itemsContainer.dataset.path = path;
 
-                    value.forEach((item, itemIndex) => {
-                        const itemGroup = document.createElement('div');
-                        itemGroup.className = 'p-2 border border-gray-700 rounded mb-2 relative';
+                    // Si es un array de strings, renderizar un único textarea y salir.
+                    if (value.length > 0 && typeof value[0] === 'string') {
+                        const listAsString = value.join('\n');
+                        createField(contentWrapper, path, key, listAsString);
+                    } else { // Si es un array de objetos, renderizar los campos para cada objeto.
+                        value.forEach((item, itemIndex) => {
+                            const itemGroup = document.createElement('div');
+                            itemGroup.className = 'p-2 border border-gray-700 rounded mb-2 relative';
 
-                        // Controles para cada item
-                        const itemControls = document.createElement('div');
-                        itemControls.className = 'section-controls';
-                        const itemMoveHandle = document.createElement('button');
-                        itemMoveHandle.innerHTML = '&#9776;';
-                        itemMoveHandle.className = 'drag-handle';
-                        const itemDeleteBtn = document.createElement('button');
-                        itemDeleteBtn.innerHTML = '&#10005;';
-                        itemDeleteBtn.dataset.action = 'delete-item';
-                        itemDeleteBtn.dataset.path = `${path}-${itemIndex}`;
-                        itemControls.appendChild(itemMoveHandle);
-                        itemControls.appendChild(itemDeleteBtn);
-                        itemGroup.appendChild(itemControls);
+                            const itemControls = document.createElement('div');
+                            itemControls.className = 'section-controls';
+                            const itemMoveHandle = document.createElement('button');
+                            itemMoveHandle.innerHTML = '&#9776;';
+                            itemMoveHandle.className = 'drag-handle';
+                            const itemDeleteBtn = document.createElement('button');
+                            itemDeleteBtn.innerHTML = '&#10005;';
+                            itemDeleteBtn.dataset.action = 'delete-item';
+                            itemDeleteBtn.dataset.path = `${path}-${itemIndex}`;
+                            itemControls.appendChild(itemMoveHandle);
+                            itemControls.appendChild(itemDeleteBtn);
+                            itemGroup.appendChild(itemControls);
 
-                        // Manejar arrays de strings (como en servicios) de forma diferente a arrays de objetos
-                        if (typeof item === 'string') {
-                            // Si es el primer item, crear el textarea para toda la lista
-                            if (itemIndex === 0) {
-                                const listAsString = value.join('\n');
-                                createField(itemsContainer, `${path}`, key, listAsString);
-                            }
-                        } else { // Para arrays de objetos
                             for (const itemKey in item) {
                                 if (typeof item[itemKey] !== 'object') {
                                     createField(itemGroup, `${path}-${itemIndex}-${itemKey}`, itemKey, item[itemKey]);
                                 }
                             }
                             itemsContainer.appendChild(itemGroup);
-                        }
-                    });
+                        });
+                        contentWrapper.appendChild(itemsContainer);
 
-                    contentWrapper.appendChild(itemsContainer);
-
-                    // Botón para añadir un nuevo item a la lista
-                    const addItemBtn = document.createElement('button');
-                    addItemBtn.textContent = `Añadir ${key}`;
-                    addItemBtn.className = 'mt-2 px-2 py-1 bg-green-600 hover:bg-green-700 text-white text-sm font-bold rounded';
-                    addItemBtn.dataset.action = 'add-item';
-                    addItemBtn.dataset.path = path;
-                    addItemBtn.dataset.template = key;
-                    contentWrapper.appendChild(addItemBtn);
+                        // Botón para añadir un nuevo item a la lista de objetos
+                        const addItemBtn = document.createElement('button');
+                        addItemBtn.textContent = `Añadir ${key}`;
+                        addItemBtn.className = 'mt-2 px-2 py-1 bg-green-600 hover:bg-green-700 text-white text-sm font-bold rounded';
+                        addItemBtn.dataset.action = 'add-item';
+                        addItemBtn.dataset.path = path;
+                        addItemBtn.dataset.template = key;
+                        contentWrapper.appendChild(addItemBtn);
+                    }
 
                 } else { // Campos simples
                     createField(contentWrapper, path, key, value);
