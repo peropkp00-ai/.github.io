@@ -1,6 +1,7 @@
 // editor.js
 import { pageSchema as defaultSchema } from './page-schema.js';
 import { sectionTemplates } from './section-templates.js';
+import { itemTemplates } from './item-templates.js';
 
 document.addEventListener('DOMContentLoaded', () => {
     const storageKey = 'userPageSchema';
@@ -58,17 +59,45 @@ document.addEventListener('DOMContentLoaded', () => {
                 const value = section.content[key];
                 const path = `${section.id}-${key}`;
 
-                if (Array.isArray(value)) { // Campos anidados
+                if (Array.isArray(value)) { // Campos anidados (listas de elementos)
+                    const itemsContainer = document.createElement('div');
+                    itemsContainer.dataset.path = path; // Ruta para añadir/reordenar
+
                     value.forEach((item, itemIndex) => {
                         const itemGroup = document.createElement('div');
-                        itemGroup.className = 'p-2 border border-gray-700 rounded mb-2';
+                        itemGroup.className = 'p-2 border border-gray-700 rounded mb-2 relative';
+
+                        // Controles para cada item
+                        const itemControls = document.createElement('div');
+                        itemControls.className = 'section-controls';
+                        const itemMoveHandle = document.createElement('button');
+                        itemMoveHandle.innerHTML = '&#9776;';
+                        itemMoveHandle.className = 'drag-handle';
+                        const itemDeleteBtn = document.createElement('button');
+                        itemDeleteBtn.innerHTML = '&#10005;';
+                        itemDeleteBtn.dataset.path = `${path}-${itemIndex}`;
+                        itemControls.appendChild(itemMoveHandle);
+                        itemControls.appendChild(itemDeleteBtn);
+                        itemGroup.appendChild(itemControls);
+
                         for (const itemKey in item) {
                             if (typeof item[itemKey] !== 'object') {
                                 createField(itemGroup, `${path}-${itemIndex}-${itemKey}`, itemKey, item[itemKey]);
                             }
                         }
-                        details.appendChild(itemGroup);
+                        itemsContainer.appendChild(itemGroup);
                     });
+
+                    contentWrapper.appendChild(itemsContainer);
+
+                    // Botón para añadir un nuevo item a la lista
+                    const addItemBtn = document.createElement('button');
+                    addItemBtn.textContent = `Añadir ${key}`;
+                    addItemBtn.className = 'mt-2 px-2 py-1 bg-green-600 hover:bg-green-700 text-white text-sm font-bold rounded';
+                    addItemBtn.dataset.path = path;
+                    addItemBtn.dataset.template = key;
+                    contentWrapper.appendChild(addItemBtn);
+
                 } else { // Campos simples
                     createField(contentWrapper, path, key, value);
                 }
@@ -197,14 +226,43 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Evento para eliminar una sección
+    // Evento para eliminar una sección o añadir/eliminar un item
     form.addEventListener('click', (event) => {
-        if (event.target.innerHTML === '✖') { // Botón de eliminar
-            const sectionIndex = event.target.dataset.sectionIndex;
+        const target = event.target;
+
+        // Eliminar Sección
+        if (target.innerHTML === '✖' && target.dataset.sectionIndex) {
+            const sectionIndex = target.dataset.sectionIndex;
             if (confirm('¿Estás seguro de que quieres eliminar esta sección?')) {
                 currentSchema.splice(sectionIndex, 1);
                 refreshUI();
             }
+            return;
+        }
+
+        // Eliminar Item
+        if (target.innerHTML === '✖' && target.dataset.path) {
+            const path = target.dataset.path.split('-');
+            const [sectionId, key, itemIndex] = path;
+            const section = currentSchema.find(s => s.id === sectionId);
+            if (section && confirm('¿Estás seguro de que quieres eliminar este elemento?')) {
+                section.content[key].splice(itemIndex, 1);
+                refreshUI();
+            }
+            return;
+        }
+
+        // Añadir Item
+        if (target.textContent.startsWith('Añadir')) {
+            const path = target.dataset.path.split('-');
+            const [sectionId, key] = path;
+            const template = target.dataset.template;
+            const section = currentSchema.find(s => s.id === sectionId);
+            if (section && itemTemplates[template]) {
+                section.content[key].push(itemTemplates[template]());
+                refreshUI();
+            }
+            return;
         }
     });
 
@@ -212,16 +270,35 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Lógica de Drag-and-Drop ---
 
     function initSortable() {
+        // Para secciones
         new Sortable(form, {
             animation: 150,
-            handle: '.drag-handle', // Usar el "handle" para arrastrar
+            handle: '.drag-handle',
             onEnd: (event) => {
-                // Mover el elemento en el array del esquema
                 const movedItem = currentSchema.splice(event.oldIndex, 1)[0];
                 currentSchema.splice(event.newIndex, 0, movedItem);
-
-                // Refrescar la UI para asegurar la consistencia y actualizar la vista previa
                 refreshUI();
+            }
+        });
+
+        // Para items dentro de secciones
+        form.querySelectorAll('[data-path]').forEach(container => {
+            // Asegurarse de que es un contenedor de items
+            if(container.children.length > 0 && container.children[0].classList.contains('relative')) {
+                new Sortable(container, {
+                    animation: 150,
+                    handle: '.drag-handle',
+                    onEnd: (event) => {
+                        const path = container.dataset.path.split('-');
+                        const [sectionId, key] = path;
+                        const section = currentSchema.find(s => s.id === sectionId);
+                        if(section) {
+                            const movedItem = section.content[key].splice(event.oldIndex, 1)[0];
+                            section.content[key].splice(event.newIndex, 0, movedItem);
+                            refreshUI();
+                        }
+                    }
+                });
             }
         });
     }
