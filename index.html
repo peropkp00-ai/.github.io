@@ -36,35 +36,34 @@
         <!-- El contenido de la página se renderizará aquí dinámicamente -->
     </div>
 
-    <!-- Script de Renderizado Dinámico -->
+    <!-- Script de Renderizado y Carga de Esquema -->
     <script type="module">
-        import { pageSchema } from './page-schema.js';
+        import { pageSchema as defaultSchema } from './page-schema.js';
         import { renderPage } from './renderer.js';
+        import * as THREE from 'three';
 
+        let currentSchema;
+
+        // Cargar el esquema desde localStorage o usar el predeterminado
+        try {
+            const savedSchema = localStorage.getItem('userPageSchema');
+            currentSchema = savedSchema ? JSON.parse(savedSchema) : defaultSchema;
+        } catch (e) {
+            console.error("Error al cargar el esquema, usando el predeterminado.", e);
+            currentSchema = defaultSchema;
+        }
+
+        // Renderizar la página con el esquema cargado
         document.addEventListener('DOMContentLoaded', () => {
             const container = document.getElementById('app-container');
             if (container) {
-                renderPage(pageSchema, container);
+                renderPage(currentSchema, container);
             }
         });
-    </script>
 
-    <!-- Lógica del WebGL y Animaciones (sin cambios) -->
-    <script type="module">
-        import * as THREE from 'three';
-        import { animationConfig } from './config.js';
-
-        // --- Cargar Configuración de Animación ---
-        const defaultConfig = animationConfig || {};
-        const storageKey = 'userAnimationConfig';
-        let settings;
-        try {
-            const savedSettings = localStorage.getItem(storageKey);
-            settings = savedSettings ? { ...defaultConfig, ...JSON.parse(savedSettings) } : { ...defaultConfig };
-        } catch (e) {
-            console.error("No se pudo cargar la configuración de la animación, usando valores por defecto.", e);
-            settings = { ...defaultConfig };
-        }
+        // --- Lógica del WebGL y Animaciones ---
+        const heroSection = currentSchema.find(s => s.type === 'hero');
+        const settings = heroSection ? heroSection.content : {};
 
         const scene = new THREE.Scene();
         const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 100);

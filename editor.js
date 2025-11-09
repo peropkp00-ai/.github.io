@@ -1,143 +1,138 @@
 // editor.js
-import { animationConfig } from './config.js';
+import { pageSchema as defaultSchema } from './page-schema.js';
 
 document.addEventListener('DOMContentLoaded', () => {
-    const defaultAnimConfig = animationConfig;
-    // contentConfig ya no se usa, será reemplazado por el pageSchema en la Fase 2
-    const defaultContentConfig = {};
-    const animStorageKey = 'userAnimationConfig';
-    const contentStorageKey = 'userContentConfig';
-
+    const storageKey = 'userPageSchema';
     const form = document.getElementById('editor-form');
     const iframe = document.getElementById('preview-iframe');
-
-    // Lista completa de IDs de los inputs
-    const inputIds = Object.keys(contentConfig).concat(Object.keys(animationConfig));
-    const inputs = {};
-    inputIds.forEach(id => {
-        inputs[id] = document.getElementById(id);
-    });
-
-    const valueDisplays = {
-        mouseFollowSpeed: document.getElementById('mouseFollowSpeed-value'),
-        mouseWaveRadius: document.getElementById('mouseWaveRadius-value'),
-        mouseWaveIntensity: document.getElementById('mouseWaveIntensity-value'),
-    };
     const saveButton = document.getElementById('save-button');
     const resetButton = document.getElementById('reset-button');
 
-    function loadSettings(key, defaultConfig) {
+    let currentSchema;
+
+    // Cargar el esquema desde localStorage o usar el predeterminado
+    function loadSchema() {
         try {
-            const savedSettings = localStorage.getItem(key);
-            return savedSettings ? { ...defaultConfig, ...JSON.parse(savedSettings) } : { ...defaultConfig };
-        } catch (error) {
-            console.error(`Error al cargar la configuración para ${key}:`, error);
-            return { ...defaultConfig };
+            const savedSchema = localStorage.getItem(storageKey);
+            currentSchema = savedSchema ? JSON.parse(savedSchema) : JSON.parse(JSON.stringify(defaultSchema));
+        } catch (e) {
+            console.error("Error al cargar el esquema, usando el predeterminado.", e);
+            currentSchema = JSON.parse(JSON.stringify(defaultSchema));
         }
     }
 
-    function populateForm(animConfig, contentConfig) {
-        const allConfigs = { ...animConfig, ...contentConfig };
-        for (const key in allConfigs) {
-            if (inputs[key]) {
-                inputs[key].value = allConfigs[key];
-                if (valueDisplays[key]) {
-                    valueDisplays[key].textContent = allConfigs[key];
-                }
-            }
-        }
-    }
+    // Generar el formulario dinámicamente
+    function renderEditor() {
+        form.innerHTML = ''; // Limpiar el formulario existente
+        currentSchema.forEach((section, sectionIndex) => {
+            const details = document.createElement('details');
+            details.open = true;
+            const summary = document.createElement('summary');
+            summary.textContent = section.type.charAt(0).toUpperCase() + section.type.slice(1);
+            details.appendChild(summary);
 
-function applyAndSaveChanges() {
-        const currentAnimConfig = {};
-        const currentContentConfig = {};
-
-        for (const key in inputs) {
-            if (!inputs[key]) continue;
-            const value = inputs[key].type === 'range' ? parseFloat(inputs[key].value) : inputs[key].value;
-            if (key in defaultAnimConfig) {
-                currentAnimConfig[key] = value;
-            } else if (key in defaultContentConfig) {
-                currentContentConfig[key] = value;
-            }
-        }
-
-        try {
-            localStorage.setItem(animStorageKey, JSON.stringify(currentAnimConfig));
-            localStorage.setItem(contentStorageKey, JSON.stringify(currentContentConfig));
-
-        // La actualización de texto en tiempo real se mantiene
-            if (iframe && iframe.contentWindow && iframe.contentWindow.document) {
-                const iframeDoc = iframe.contentWindow.document;
-                for (const key in currentContentConfig) {
-                    const element = iframeDoc.getElementById(key);
-                    if (element) {
-                         if (key.includes('_list')) {
-                            element.innerHTML = '';
-                            const items = currentContentConfig[key].split('\n');
-                            items.forEach(itemText => {
-                                if (itemText.trim() !== '') {
-                                    const li = iframeDoc.createElement('li');
-                                    li.textContent = itemText;
-                                    element.appendChild(li);
-                                }
-                            });
-                        } else {
-                            element.textContent = currentContentConfig[key];
+            for (const key in section.content) {
+                const value = section.content[key];
+                // Renderizar campos anidados (tarjetas, pilares, etc.)
+                if (Array.isArray(value)) {
+                    value.forEach((item, itemIndex) => {
+                        const itemGroup = document.createElement('div');
+                        itemGroup.className = 'p-2 border border-gray-700 rounded mb-2';
+                        for (const itemKey in item) {
+                            if (typeof item[itemKey] !== 'object') {
+                                createField(itemGroup, `${section.id}-${key}-${itemIndex}-${itemKey}`, `${itemKey}`, item[itemKey]);
+                            }
                         }
-                    }
+                        details.appendChild(itemGroup);
+                    });
+                } else { // Renderizar campos simples
+                    createField(details, `${section.id}-${key}`, key, value);
                 }
             }
-        } catch (error) {
-            console.error("Error al guardar o aplicar la configuración:", error);
-        }
+            form.appendChild(details);
+        });
     }
 
-    const currentAnimSettings = loadSettings(animStorageKey, defaultAnimConfig);
-    const currentContentSettings = loadSettings(contentStorageKey, defaultContentConfig);
-    populateForm(currentAnimSettings, currentContentSettings);
+    // Crear un campo de formulario individual
+    function createField(container, id, label, value) {
+        const group = document.createElement('div');
+        group.className = 'control-group';
+        const labelEl = document.createElement('label');
+        labelEl.htmlFor = id;
+        labelEl.textContent = label;
+        group.appendChild(labelEl);
 
-    iframe.addEventListener('load', () => {
-        // Al cargar el iframe, se aplican los cambios de texto sin recargar
-        applyAndSaveChanges();
-    });
-
-    form.addEventListener('input', (event) => {
-        const changedInput = event.target;
-        // Actualiza las pantallas de valores para los controles deslizantes en tiempo real
-        if (valueDisplays[changedInput.id]) {
-            valueDisplays[changedInput.id].textContent = changedInput.value;
+        let input;
+        if (label.includes('color')) {
+            input = document.createElement('input');
+            input.type = 'color';
+        } else if (typeof value === 'number') {
+            input = document.createElement('input');
+            input.type = 'range';
+            input.min = 0;
+            input.max = (label.includes('Speed')) ? 1 : 10;
+            input.step = 0.1;
+        } else if (String(value).length > 100) {
+            input = document.createElement('textarea');
+            input.rows = 4;
+        } else {
+            input = document.createElement('input');
+            input.type = 'text';
         }
-        // Guarda todos los cambios en cada entrada, actualizando el texto en vivo
-        applyAndSaveChanges();
-    });
 
-    // Añade un detector de cambios para recargar en los controles de animación
-    form.addEventListener('change', (event) => {
-        const changedInput = event.target;
-        // Recarga el iframe solo si se ha modificado un control de animación
-        if (changedInput.id in defaultAnimConfig) {
-            // Primero guarda el valor más reciente
-            applyAndSaveChanges();
-            // Luego recarga para mostrar el cambio de animación
+        input.id = id;
+        input.value = value;
+        input.dataset.path = id; // Guardar la ruta para actualizar el esquema
+        group.appendChild(input);
+        container.appendChild(group);
+    }
+
+    // Guardar el estado actual del formulario en el objeto del esquema
+    function updateSchemaFromForm() {
+        form.querySelectorAll('input, textarea').forEach(input => {
+            const path = input.dataset.path.split('-');
+            const [sectionId, key, itemIndex, itemKey] = path;
+
+            const section = currentSchema.find(s => s.id === sectionId);
+            if (!section) return;
+
+            if (itemIndex !== undefined && itemKey !== undefined) {
+                // Actualizar un campo anidado
+                if (section.content[key][itemIndex]) {
+                    section.content[key][itemIndex][itemKey] = input.value;
+                }
+            } else {
+                // Actualizar un campo simple
+                let value = input.value;
+                if (input.type === 'range') value = parseFloat(value);
+                section.content[key] = value;
+            }
+        });
+    }
+
+    // Evento para guardar
+    saveButton.addEventListener('click', () => {
+        updateSchemaFromForm();
+        try {
+            localStorage.setItem(storageKey, JSON.stringify(currentSchema));
+            alert('¡Guardado!');
             iframe.contentWindow.location.reload();
+        } catch (e) {
+            console.error("Error al guardar el esquema.", e);
+            alert('Error al guardar.');
         }
     });
 
-    saveButton.addEventListener('click', (event) => {
-        event.preventDefault();
-        applyAndSaveChanges(); // Asegura que los últimos cambios se guarden
-        iframe.contentWindow.location.reload(); // Recarga para asegurar que todos los cambios (incluida la animación) se apliquen
-        saveButton.textContent = '¡Guardado!';
-        setTimeout(() => { saveButton.textContent = 'Guardar Cambios'; }, 1500);
-    });
-
+    // Evento para restaurar
     resetButton.addEventListener('click', () => {
         if (confirm('¿Estás seguro? Se restaurarán todos los valores a los predeterminados.')) {
-            localStorage.removeItem(animStorageKey);
-            localStorage.removeItem(contentStorageKey);
-            populateForm(defaultAnimConfig, defaultContentConfig);
-            applyAndSaveChanges();
+            localStorage.removeItem(storageKey);
+            loadSchema();
+            renderEditor();
         }
     });
+
+    // Carga inicial
+    loadSchema();
+    renderEditor();
 });

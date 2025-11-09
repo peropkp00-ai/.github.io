@@ -150,33 +150,43 @@ function renderFooterSection(section) {
 
 
 export function renderPage(schema, container) {
-    let fullHtml = '';
+    let mainContentHtml = '';
+    let heroHtml = '';
+
     schema.forEach(section => {
         switch (section.type) {
             case 'hero':
-                fullHtml += renderHeroSection(section);
+                // El Hero se renderiza fuera del <main>
+                heroHtml = renderHeroSection(section);
                 break;
             case 'identity':
-                fullHtml += renderIdentitySection(section);
+                mainContentHtml += renderIdentitySection(section);
                 break;
             case 'pillars':
-                fullHtml += renderPillarsSection(section);
+                mainContentHtml += renderPillarsSection(section);
                 break;
             case 'services':
-                fullHtml += renderServicesSection(section);
+                mainContentHtml += renderServicesSection(section);
                 break;
             case 'projects':
-                fullHtml += renderProjectsSection(section);
+                mainContentHtml += renderProjectsSection(section);
                 break;
             case 'team':
-                fullHtml += renderTeamSection(section);
+                mainContentHtml += renderTeamSection(section);
                 break;
             case 'footer':
-                fullHtml += renderFooterSection(section);
+                mainContentHtml += renderFooterSection(section);
                 break;
             default:
                 console.warn(`Tipo de sección desconocido: ${section.type}`);
         }
     });
-    container.innerHTML = fullHtml;
+
+    // Se envuelve el contenido principal en <main class="scroll-content">
+    container.innerHTML = `
+        ${heroHtml}
+        <main class="scroll-content">
+            ${mainContentHtml}
+        </main>
+    `;
 }

@@ -6,6 +6,15 @@ export const pageSchema = [
         type: 'hero',
         id: 'hero',
         content: {
+            // --- Animación ---
+            mouseFollowSpeed: 0.1,
+            mouseWaveRadius: 2.5,
+            mouseWaveIntensity: 3.0,
+            colorA: '#a87eff',
+            colorB: '#00ffff',
+            colorInteraction: '#ffffff',
+
+            // --- Contenido ---
             nav_brand: "NAVALEK",
             hero_title: "NAVALEK SPA",
             hero_subtitle: "Proyectos de Ingeniería y Asesorías Eléctricas",
