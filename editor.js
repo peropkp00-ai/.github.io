@@ -46,6 +46,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const deleteBtn = document.createElement('button');
             deleteBtn.innerHTML = '&#10005;'; // Icono de X para eliminar
+            deleteBtn.dataset.action = 'delete-section';
             deleteBtn.dataset.sectionIndex = sectionIndex;
             controls.appendChild(deleteBtn);
 
@@ -61,6 +62,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 if (Array.isArray(value)) { // Campos anidados (listas de elementos)
                     const itemsContainer = document.createElement('div');
+                    itemsContainer.className = 'items-container'; // Clase explícita para SortableJS
                     itemsContainer.dataset.path = path; // Ruta para añadir/reordenar
 
                     value.forEach((item, itemIndex) => {
@@ -75,6 +77,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         itemMoveHandle.className = 'drag-handle';
                         const itemDeleteBtn = document.createElement('button');
                         itemDeleteBtn.innerHTML = '&#10005;';
+                        itemDeleteBtn.dataset.action = 'delete-item';
                         itemDeleteBtn.dataset.path = `${path}-${itemIndex}`;
                         itemControls.appendChild(itemMoveHandle);
                         itemControls.appendChild(itemDeleteBtn);
@@ -94,6 +97,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     const addItemBtn = document.createElement('button');
                     addItemBtn.textContent = `Añadir ${key}`;
                     addItemBtn.className = 'mt-2 px-2 py-1 bg-green-600 hover:bg-green-700 text-white text-sm font-bold rounded';
+                    addItemBtn.dataset.action = 'add-item';
                     addItemBtn.dataset.path = path;
                     addItemBtn.dataset.template = key;
                     contentWrapper.appendChild(addItemBtn);
@@ -211,6 +215,16 @@ document.addEventListener('DOMContentLoaded', () => {
         iframe.contentWindow.location.reload();
     }
 
+    // Guardar el estado actual y luego refrescar la UI
+    function saveAndRefresh() {
+        try {
+            localStorage.setItem(storageKey, JSON.stringify(currentSchema));
+            refreshUI();
+        } catch (e) {
+            console.error("Error al guardar antes de refrescar.", e);
+        }
+    }
+
     // Evento para mostrar/ocultar el menú de añadir
     addSectionBtn.addEventListener('click', () => {
         addSectionMenu.classList.toggle('hidden');
@@ -221,48 +235,45 @@ document.addEventListener('DOMContentLoaded', () => {
         const type = event.target.dataset.type;
         if (type && sectionTemplates[type]) {
             currentSchema.push(sectionTemplates[type]());
-            refreshUI();
+            saveAndRefresh();
             addSectionMenu.classList.add('hidden');
         }
     });
 
-    // Evento para eliminar una sección o añadir/eliminar un item
+    // Delegación de eventos para acciones en el formulario
     form.addEventListener('click', (event) => {
-        const target = event.target;
+        const target = event.target.closest('[data-action]');
+        if (!target) return;
 
-        // Eliminar Sección
-        if (target.innerHTML === '✖' && target.dataset.sectionIndex) {
+        const action = target.dataset.action;
+
+        if (action === 'delete-section') {
             const sectionIndex = target.dataset.sectionIndex;
             if (confirm('¿Estás seguro de que quieres eliminar esta sección?')) {
                 currentSchema.splice(sectionIndex, 1);
-                refreshUI();
+                saveAndRefresh();
             }
-            return;
         }
 
-        // Eliminar Item
-        if (target.innerHTML === '✖' && target.dataset.path) {
+        if (action === 'delete-item') {
             const path = target.dataset.path.split('-');
             const [sectionId, key, itemIndex] = path;
             const section = currentSchema.find(s => s.id === sectionId);
             if (section && confirm('¿Estás seguro de que quieres eliminar este elemento?')) {
                 section.content[key].splice(itemIndex, 1);
-                refreshUI();
+                saveAndRefresh();
             }
-            return;
         }
 
-        // Añadir Item
-        if (target.textContent.startsWith('Añadir')) {
+        if (action === 'add-item') {
             const path = target.dataset.path.split('-');
             const [sectionId, key] = path;
             const template = target.dataset.template;
             const section = currentSchema.find(s => s.id === sectionId);
             if (section && itemTemplates[template]) {
                 section.content[key].push(itemTemplates[template]());
-                refreshUI();
+                saveAndRefresh();
             }
-            return;
         }
     });
 
@@ -277,29 +288,26 @@ document.addEventListener('DOMContentLoaded', () => {
             onEnd: (event) => {
                 const movedItem = currentSchema.splice(event.oldIndex, 1)[0];
                 currentSchema.splice(event.newIndex, 0, movedItem);
-                refreshUI();
+                saveAndRefresh();
             }
         });
 
         // Para items dentro de secciones
-        form.querySelectorAll('[data-path]').forEach(container => {
-            // Asegurarse de que es un contenedor de items
-            if(container.children.length > 0 && container.children[0].classList.contains('relative')) {
-                new Sortable(container, {
-                    animation: 150,
-                    handle: '.drag-handle',
-                    onEnd: (event) => {
-                        const path = container.dataset.path.split('-');
-                        const [sectionId, key] = path;
-                        const section = currentSchema.find(s => s.id === sectionId);
-                        if(section) {
-                            const movedItem = section.content[key].splice(event.oldIndex, 1)[0];
-                            section.content[key].splice(event.newIndex, 0, movedItem);
-                            refreshUI();
-                        }
+        form.querySelectorAll('.items-container').forEach(container => {
+            new Sortable(container, {
+                animation: 150,
+                handle: '.drag-handle',
+                onEnd: (event) => {
+                    const path = container.dataset.path.split('-');
+                    const [sectionId, key] = path;
+                    const section = currentSchema.find(s => s.id === sectionId);
+                    if(section) {
+                        const movedItem = section.content[key].splice(event.oldIndex, 1)[0];
+                        section.content[key].splice(event.newIndex, 0, movedItem);
+                        saveAndRefresh();
                     }
-                });
-            }
+                }
+            });
         });
     }
 
