@@ -53,13 +53,11 @@
             currentSchema = defaultSchema;
         }
 
-        // Renderizar la página con el esquema cargado
-        document.addEventListener('DOMContentLoaded', () => {
-            const container = document.getElementById('app-container');
-            if (container) {
-                renderPage(currentSchema, container);
-            }
-        });
+        // Renderizar la página inmediatamente
+        const container = document.getElementById('app-container');
+        if (container) {
+            renderPage(currentSchema, container);
+        }
 
         // --- API de Actualización en Vivo ---
         window.liveUpdater = {
