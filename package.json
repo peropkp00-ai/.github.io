@@ -19,6 +19,7 @@
   "homepage": "https://github.com/peropkp00-ai/.github.io#readme",
   "dependencies": {
     "axios": "^1.13.2",
-    "dotenv": "^17.2.3"
+    "dotenv": "^17.2.3",
+    "playwright": "^1.56.1"
   }
 }
