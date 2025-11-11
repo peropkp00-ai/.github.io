@@ -1,15 +1,12 @@
 // renderer.js
+// Recreado desde la memoria debido a un borrado accidental por parte de una herramienta.
+
 import { IdentityCard } from './components/IdentityCard.js';
 import { Pillar } from './components/Pillar.js';
 import { Service } from './components/Service.js';
 import { Project } from './components/Project.js';
 import { TeamMember } from './components/TeamMember.js';
 
-/**
- * Genera una cadena de clases de Tailwind CSS a partir de un objeto de espaciado.
- * @param {object} spacing - El objeto de espaciado del schema (ej. { pt: '16', pb: '16' }).
- * @returns {string} Una cadena de clases de Tailwind (ej. "pt-16 pb-16").
- */
 function getSpacingClasses(spacing) {
     if (!spacing) return '';
     return Object.entries(spacing)
@@ -76,8 +73,6 @@ function renderPillarsSection(section) {
 function renderServicesSection(section) {
     const c = section.content;
     const id = section.id;
-    const spacingClasses = getSpacingClasses(section.spacing);
-    // Nota: El padding horizontal se aplica a los contenedores internos para mantener el ancho máximo.
     return `
         <section id="${id}" class="py-${section.spacing.pt || 0}">
             <div class="max-w-7xl mx-auto px-${section.spacing.pl || 0}">
@@ -90,7 +85,6 @@ function renderServicesSection(section) {
         </section>
     `;
 }
-
 
 function renderProjectsSection(section) {
     const c = section.content;
@@ -146,7 +140,6 @@ function renderFooterSection(section) {
         </footer>
     `;
 }
-
 
 export function renderPage(schema, container) {
     let mainContentHtml = '';
