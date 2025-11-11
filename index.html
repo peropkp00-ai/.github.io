@@ -61,14 +61,16 @@
 
         // --- API de Actualización en Vivo (Enfoque Granular) ---
         window.liveUpdater = {
+            updateStyle: (elementId, styleProp, value) => {
+                const element = document.getElementById(elementId);
+                if(element) {
+                    element.style[styleProp] = value;
+                }
+            },
             updateText: (elementId, newText) => {
                 const element = document.getElementById(elementId);
                 if (element) {
-                    if (element.tagName === 'UL') {
-                        element.innerHTML = newText.split('\n').map(item => `<li>${item}</li>`).join('');
-                    } else {
-                        element.textContent = newText;
-                    }
+                    element.innerHTML = newText;
                 }
             },
             updateAttribute: (elementId, attribute, value) => {
@@ -102,6 +104,25 @@
                 if (uniformName === 'u_mouseFollowSpeed') {
                     settings.mouseFollowSpeed = value;
                 }
+            },
+            updateSpacing: (elementId, spacingObject) => {
+                const element = document.getElementById(elementId);
+                if (!element) return;
+
+                // Filtrar clases existentes para remover las de padding
+                const preservedClasses = Array.from(element.classList).filter(c =>
+                    !c.startsWith('pt-') &&
+                    !c.startsWith('pb-') &&
+                    !c.startsWith('pl-') &&
+                    !c.startsWith('pr-')
+                );
+
+                // Crear las nuevas clases de spacing
+                const spacingClasses = Object.entries(spacingObject)
+                    .map(([key, value]) => `${key}-${value}`);
+
+                // Combinar y aplicar
+                element.className = [...preservedClasses, ...spacingClasses].join(' ');
             }
         };
 
@@ -235,6 +256,49 @@
             renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
         }
         window.addEventListener('resize', onWindowResize);
+
+        // --- Sincronizador de Selección para Editor de Estilos ---
+        let selectedElement = null;
+        document.body.addEventListener('click', (event) => {
+            // Eliminar el resaltado anterior
+            if (selectedElement) {
+                selectedElement.style.outline = '';
+            }
+
+            // Encontrar el componente clickeado más cercano
+            const target = event.target.closest('[id]');
+
+            if (target) {
+                selectedElement = target;
+                selectedElement.style.outline = '2px solid #67e8f9'; // Resaltado cian
+
+                // Enviar el ID del elemento seleccionado al editor
+                window.parent.postMessage({
+                    type: 'element-selected',
+                    payload: {
+                        id: target.id
+                    }
+                }, '*');
+            }
+        });
+
+        // --- Sincronizador de Edición In-place ---
+        document.body.addEventListener('input', (event) => {
+            const target = event.target;
+            if (target.isContentEditable) {
+                const id = target.id;
+                if (id) {
+                    window.parent.postMessage({
+                        type: 'inline-edit',
+                        payload: {
+                            id: id,
+                            newText: target.innerHTML
+                        }
+                    }, '*');
+                }
+            }
+        });
+
     </script>
 </body>
 </html>
