@@ -44,19 +44,28 @@
 
         let currentSchema;
 
-        // Cargar el esquema desde localStorage o usar el predeterminado
-        try {
-            const savedSchema = localStorage.getItem('userPageSchema');
-            currentSchema = savedSchema ? JSON.parse(savedSchema) : defaultSchema;
-        } catch (e) {
-            console.error("Error al cargar el esquema, usando el predeterminado.", e);
-            currentSchema = defaultSchema;
+        function initializePage() {
+            // Cargar el esquema desde localStorage o usar el predeterminado
+            try {
+                const savedSchema = localStorage.getItem('userPageSchema');
+                currentSchema = savedSchema ? JSON.parse(savedSchema) : defaultSchema;
+            } catch (e) {
+                console.error("Error al cargar el esquema, usando el predeterminado.", e);
+                currentSchema = defaultSchema;
+            }
+
+            // Renderizar la página
+            const container = document.getElementById('app-container');
+            if (container) {
+                renderPage(currentSchema, container);
+            }
         }
 
-        // Renderizar la página inmediatamente
-        const container = document.getElementById('app-container');
-        if (container) {
-            renderPage(currentSchema, container);
+        // Asegurarse de que el DOM esté completamente cargado antes de ejecutar el script
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initializePage);
+        } else {
+            initializePage();
         }
 
         // --- API de Actualización en Vivo (Enfoque Granular) ---
