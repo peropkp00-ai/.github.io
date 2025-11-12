@@ -447,6 +447,15 @@ document.addEventListener('DOMContentLoaded', () => {
         } else if (type === 'element-selected') {
             tabStyles.click();
             renderStyleEditor(payload.id);
+        } else if (type === 'visual-spacing-update') {
+            const { sectionId, direction, newValue } = payload;
+            const inputId = `${sectionId}-spacing-${direction}`;
+            const input = document.getElementById(inputId);
+            if (input) {
+                input.value = newValue;
+                // Disparar el evento 'input' para que la lógica de actualización del schema se ejecute
+                input.dispatchEvent(new Event('input', { bubbles: true }));
+            }
         }
     });
 

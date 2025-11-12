@@ -26,11 +26,41 @@
         .hero-section { height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; position: relative; z-index: 5; padding: 1rem; }
         .glass-card { background: rgba(13, 26, 63, 0.6); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border: 1px solid rgba(168, 126, 255, 0.1); }
         .hexagon-clip { clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%); }
+
+        /* Estilos para el Overlay de Espaciado Interactivo */
+        #spacing-overlay {
+            position: absolute;
+            border: 2px dashed rgba(139, 92, 246, 0.7); /* Morado */
+            box-sizing: border-box;
+            z-index: 1000;
+            pointer-events: none; /* Ignora el ratón en el overlay principal */
+            display: none; /* Oculto por defecto */
+        }
+        .handle {
+            position: absolute;
+            background-color: rgba(139, 92, 246, 1); /* Morado sólido */
+            pointer-events: auto; /* Los manejadores SÍ interactúan con el ratón */
+            cursor: grab;
+        }
+        .handle-top, .handle-bottom { width: 40px; height: 8px; left: 50%; transform: translateX(-50%); }
+        .handle-left, .handle-right { width: 8px; height: 40px; top: 50%; transform: translateY(-50%); }
+        .handle-top { top: -4px; }
+        .handle-bottom { bottom: -4px; }
+        .handle-left { left: -4px; }
+        .handle-right { right: -4px; }
     </style>
 </head>
 <body class="antialiased">
 
     <canvas id="webgl-canvas"></canvas>
+
+    <!-- Overlay para edición de espaciado -->
+    <div id="spacing-overlay">
+        <div class="handle handle-top" data-direction="pt"></div>
+        <div class="handle handle-right" data-direction="pr"></div>
+        <div class="handle handle-bottom" data-direction="pb"></div>
+        <div class="handle handle-left" data-direction="pl"></div>
+    </div>
 
     <div id="app-container">
         <!-- El contenido de la página se renderizará aquí dinámicamente -->
@@ -305,6 +335,113 @@
                         }
                     }, '*');
                 }
+            }
+        });
+
+        // --- Lógica del Overlay de Espaciado Interactivo ---
+        const spacingOverlay = document.getElementById('spacing-overlay');
+        let currentSection = null;
+
+        document.body.addEventListener('mouseover', (event) => {
+            const section = event.target.closest('section');
+            if (section && section !== currentSection) {
+                currentSection = section;
+                const rect = section.getBoundingClientRect();
+
+                spacingOverlay.style.display = 'block';
+                spacingOverlay.style.top = `${rect.top + window.scrollY}px`;
+                spacingOverlay.style.left = `${rect.left + window.scrollX}px`;
+                spacingOverlay.style.width = `${rect.width}px`;
+                spacingOverlay.style.height = `${rect.height}px`;
+            }
+        });
+
+        document.getElementById('app-container').addEventListener('mouseleave', () => {
+             if (!isDragging) {
+                spacingOverlay.style.display = 'none';
+                currentSection = null;
+             }
+        });
+
+        // --- Lógica de Arrastre de los Manejadores ---
+        let isDragging = false;
+        let startY = 0, startX = 0;
+        let handleDirection = null;
+        let initialPadding = 0;
+        const PIXELS_PER_UNIT = 4; // 1 unidad de Tailwind (ej. pt-4) equivale a 1rem = 16px. Usamos 4px/unidad para más granularidad.
+
+        spacingOverlay.addEventListener('mousedown', (event) => {
+            const handle = event.target.closest('.handle');
+            if (handle && currentSection) {
+                const sectionSchema = currentSchema.find(s => s.id === currentSection.id);
+                if (!sectionSchema || !sectionSchema.spacing) return;
+
+                isDragging = true;
+                startY = event.clientY;
+                startX = event.clientX;
+                handleDirection = handle.dataset.direction;
+                initialPadding = parseInt(sectionSchema.spacing[handleDirection], 10) || 0;
+
+                document.body.style.cursor = 'grabbing';
+                event.preventDefault();
+            }
+        });
+
+        window.addEventListener('mousemove', (event) => {
+            if (!isDragging || !currentSection) return;
+
+            const deltaY = event.clientY - startY;
+            const deltaX = event.clientX - startX;
+            let newPadding = initialPadding;
+
+            switch(handleDirection) {
+                case 'pt': newPadding = initialPadding + Math.round(deltaY / PIXELS_PER_UNIT); break;
+                case 'pb': newPadding = initialPadding - Math.round(deltaY / PIXELS_PER_UNIT); break;
+                case 'pl': newPadding = initialPadding + Math.round(deltaX / PIXELS_PER_UNIT); break;
+                case 'pr': newPadding = initialPadding - Math.round(deltaX / PIXELS_PER_UNIT); break;
+            }
+
+            newPadding = Math.max(0, newPadding); // No permitir padding negativo
+
+            // Actualización visual en tiempo real (directamente en el estilo para fluidez)
+            currentSection.style.paddingTop = handleDirection === 'pt' ? `${newPadding * 4}px` : currentSection.style.paddingTop;
+            currentSection.style.paddingBottom = handleDirection === 'pb' ? `${newPadding * 4}px` : currentSection.style.paddingBottom;
+            currentSection.style.paddingLeft = handleDirection === 'pl' ? `${newPadding * 4}px` : currentSection.style.paddingLeft;
+            currentSection.style.paddingRight = handleDirection === 'pr' ? `${newPadding * 4}px` : currentSection.style.paddingRight;
+        });
+
+        window.addEventListener('mouseup', (event) => {
+            if (isDragging && currentSection) {
+                isDragging = false;
+                document.body.style.cursor = 'default';
+
+                const deltaY = event.clientY - startY;
+                const deltaX = event.clientX - startX;
+                let newPadding = initialPadding;
+
+                switch(handleDirection) {
+                    case 'pt': newPadding = initialPadding + Math.round(deltaY / PIXELS_PER_UNIT); break;
+                    case 'pb': newPadding = initialPadding - Math.round(deltaY / PIXELS_PER_UNIT); break;
+                    case 'pl': newPadding = initialPadding + Math.round(deltaX / PIXELS_PER_UNIT); break;
+                    case 'pr': newPadding = initialPadding - Math.round(deltaX / PIXELS_PER_UNIT); break;
+                }
+                newPadding = Math.max(0, newPadding);
+
+                // Enviar el valor final al editor
+                window.parent.postMessage({
+                    type: 'visual-spacing-update',
+                    payload: {
+                        sectionId: currentSection.id,
+                        direction: handleDirection,
+                        newValue: newPadding
+                    }
+                }, '*');
+
+                // Limpiar estilos en línea para que las clases de Tailwind tomen el control de nuevo
+                currentSection.style.paddingTop = '';
+                currentSection.style.paddingBottom = '';
+                currentSection.style.paddingLeft = '';
+                currentSection.style.paddingRight = '';
             }
         });
 
