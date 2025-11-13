@@ -4,12 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NAVALEK SPA - Proyectos de Ingeniería Eléctrica</title>
-    
+
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700;900&display=swap" rel="stylesheet">
-    
+
     <script async src="https://unpkg.com/es-module-shims@1.6.3/dist/es-module-shims.js"></script>
     <script type="importmap">
         {
@@ -172,7 +172,7 @@
         const scene = new THREE.Scene();
         const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 100);
         camera.position.set(0, 0, 10);
-        
+
         const renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('webgl-canvas'), alpha: true });
         renderer.setSize(window.innerWidth, window.innerHeight);
         renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
@@ -180,7 +180,7 @@
         const planeSize = 50;
         const planeSegments = 50;
         const geometry = new THREE.PlaneGeometry(planeSize, planeSize, planeSegments, planeSegments);
-        
+
         const colorA = new THREE.Color(settings.colorA);
         const colorB = new THREE.Color(settings.colorB);
         const colorInteraction = new THREE.Color(settings.colorInteraction);
@@ -258,7 +258,7 @@
         let scrollY = window.scrollY;
         let currentScroll = window.scrollY;
         window.addEventListener('scroll', () => { scrollY = window.scrollY; });
-        
+
         const mouse = new THREE.Vector2(0, 0);
         const targetMouse = new THREE.Vector2(0, 0);
         window.addEventListener('mousemove', (event) => {
