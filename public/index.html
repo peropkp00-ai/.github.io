@@ -68,54 +68,39 @@
 
     <!-- Script de Renderizado y Carga de Esquema -->
     <script type="module">
-        import { pageSchema as defaultSchema } from './page-schema.js';
+        import { pageSchema as defaultSchema } from './page-schema.mjs';
         import { renderPage } from './renderer.js';
         import * as THREE from 'three';
 
         let currentSchema;
 
-        function initializePage() {
-            // Cargar el esquema desde localStorage o usar el predeterminado
-            try {
-                const savedSchema = localStorage.getItem('userPageSchema');
-                currentSchema = savedSchema ? JSON.parse(savedSchema) : defaultSchema;
-            } catch (e) {
-                console.error("Error al cargar el esquema, usando el predeterminado.", e);
-                currentSchema = defaultSchema;
-            }
+        // Cargar el esquema desde localStorage o usar el predeterminado
+        try {
+            const savedSchema = localStorage.getItem('userPageSchema');
+            currentSchema = savedSchema ? JSON.parse(savedSchema) : defaultSchema;
+        } catch (e) {
+            console.error("Error al cargar el esquema, usando el predeterminado.", e);
+            currentSchema = defaultSchema;
+        }
 
-            // Renderizar la página
+        // Renderizar la página con el esquema cargado
+        document.addEventListener('DOMContentLoaded', () => {
             const container = document.getElementById('app-container');
             if (container) {
                 renderPage(currentSchema, container);
             }
-        }
+        });
 
-        // Asegurarse de que el DOM esté completamente cargado antes de ejecutar el script
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', initializePage);
-        } else {
-            initializePage();
-        }
-
-        // --- API de Actualización en Vivo (Enfoque Granular) ---
+        // --- API de Actualización en Vivo ---
         window.liveUpdater = {
-            updateStyle: (elementId, styleProp, value) => {
-                const element = document.getElementById(elementId);
-                if(element) {
-                    element.style[styleProp] = value;
-                }
-            },
             updateText: (elementId, newText) => {
                 const element = document.getElementById(elementId);
                 if (element) {
-                    element.innerHTML = newText;
-                }
-            },
-            updateAttribute: (elementId, attribute, value) => {
-                const element = document.getElementById(elementId);
-                if (element) {
-                    element.setAttribute(attribute, value);
+                    if (element.tagName === 'UL') {
+                        element.innerHTML = newText.split('\n').map(item => `<li>${item}</li>`).join('');
+                    } else {
+                        element.textContent = newText;
+                    }
                 }
             },
             addElement: (containerSelector, itemHtml) => {
@@ -126,21 +111,27 @@
             },
             removeElement: (elementId) => {
                 const element = document.getElementById(elementId);
-                // Busca el contenedor del item más cercano para eliminarlo
                 if (element) {
-                    const itemWrapper = element.closest('.glass-card, .hexagon-clip');
-                    if (itemWrapper) itemWrapper.remove();
-                }
-            },
-            updateAnimation: (uniformName, value) => {
-                if (material && material.uniforms[uniformName]) {
-                    if (uniformName.toLowerCase().includes('color')) {
-                        material.uniforms[uniformName].value.set(value);
-                    } else {
-                        material.uniforms[uniformName].value = value;
+                    const itemWrapper = element.closest('.glass-card, div > .hexagon-clip');
+                    if (itemWrapper) {
+                         // Si el elemento a remover es un miembro del equipo, debemos remover el div contenedor.
+                        if(itemWrapper.classList.contains('hexagon-clip')) {
+                            itemWrapper.parentElement.remove();
+                        } else {
+                            itemWrapper.remove();
+                        }
                     }
                 }
-                if (uniformName === 'u_mouseFollowSpeed') {
+            },
+            updateAnimation: (key, value) => {
+                if (material.uniforms[key]) {
+                    if (key.toLowerCase().includes('color')) {
+                        material.uniforms[key].value.set(value);
+                    } else {
+                        material.uniforms[key].value = value;
+                    }
+                }
+                if (key === 'mouseFollowSpeed') {
                     settings.mouseFollowSpeed = value;
                 }
             },
@@ -148,19 +139,14 @@
                 const element = document.getElementById(elementId);
                 if (!element) return;
 
-                // Filtrar clases existentes para remover las de padding
                 const preservedClasses = Array.from(element.classList).filter(c =>
-                    !c.startsWith('pt-') &&
-                    !c.startsWith('pb-') &&
-                    !c.startsWith('pl-') &&
-                    !c.startsWith('pr-')
+                    !c.startsWith('pt-') && !c.startsWith('pb-') &&
+                    !c.startsWith('pl-') && !c.startsWith('pr-')
                 );
 
-                // Crear las nuevas clases de spacing
                 const spacingClasses = Object.entries(spacingObject)
                     .map(([key, value]) => `${key}-${value}`);
 
-                // Combinar y aplicar
                 element.className = [...preservedClasses, ...spacingClasses].join(' ');
             }
         };
@@ -296,48 +282,6 @@
         }
         window.addEventListener('resize', onWindowResize);
 
-        // --- Sincronizador de Selección para Editor de Estilos ---
-        let selectedElement = null;
-        document.body.addEventListener('click', (event) => {
-            // Eliminar el resaltado anterior
-            if (selectedElement) {
-                selectedElement.style.outline = '';
-            }
-
-            // Encontrar el componente clickeado más cercano
-            const target = event.target.closest('[id]');
-
-            if (target) {
-                selectedElement = target;
-                selectedElement.style.outline = '2px solid #67e8f9'; // Resaltado cian
-
-                // Enviar el ID del elemento seleccionado al editor
-                window.parent.postMessage({
-                    type: 'element-selected',
-                    payload: {
-                        id: target.id
-                    }
-                }, '*');
-            }
-        });
-
-        // --- Sincronizador de Edición In-place ---
-        document.body.addEventListener('input', (event) => {
-            const target = event.target;
-            if (target.isContentEditable) {
-                const id = target.id;
-                if (id) {
-                    window.parent.postMessage({
-                        type: 'inline-edit',
-                        payload: {
-                            id: id,
-                            newText: target.innerHTML
-                        }
-                    }, '*');
-                }
-            }
-        });
-
         // --- Lógica del Overlay de Espaciado Interactivo ---
         const spacingOverlay = document.getElementById('spacing-overlay');
         let currentSection = null;
@@ -368,7 +312,7 @@
         let startY = 0, startX = 0;
         let handleDirection = null;
         let initialPadding = 0;
-        const PIXELS_PER_UNIT = 4; // 1 unidad de Tailwind (ej. pt-4) equivale a 1rem = 16px. Usamos 4px/unidad para más granularidad.
+        const PIXELS_PER_UNIT = 4;
 
         spacingOverlay.addEventListener('mousedown', (event) => {
             const handle = event.target.closest('.handle');
@@ -400,10 +344,8 @@
                 case 'pl': newPadding = initialPadding + Math.round(deltaX / PIXELS_PER_UNIT); break;
                 case 'pr': newPadding = initialPadding - Math.round(deltaX / PIXELS_PER_UNIT); break;
             }
+            newPadding = Math.max(0, newPadding);
 
-            newPadding = Math.max(0, newPadding); // No permitir padding negativo
-
-            // Actualización visual en tiempo real (directamente en el estilo para fluidez)
             currentSection.style.paddingTop = handleDirection === 'pt' ? `${newPadding * 4}px` : currentSection.style.paddingTop;
             currentSection.style.paddingBottom = handleDirection === 'pb' ? `${newPadding * 4}px` : currentSection.style.paddingBottom;
             currentSection.style.paddingLeft = handleDirection === 'pl' ? `${newPadding * 4}px` : currentSection.style.paddingLeft;
@@ -427,7 +369,6 @@
                 }
                 newPadding = Math.max(0, newPadding);
 
-                // Enviar el valor final al editor
                 window.parent.postMessage({
                     type: 'visual-spacing-update',
                     payload: {
@@ -437,14 +378,12 @@
                     }
                 }, '*');
 
-                // Limpiar estilos en línea para que las clases de Tailwind tomen el control de nuevo
                 currentSection.style.paddingTop = '';
                 currentSection.style.paddingBottom = '';
                 currentSection.style.paddingLeft = '';
                 currentSection.style.paddingRight = '';
             }
         });
-
     </script>
 </body>
 </html>
