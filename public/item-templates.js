@@ -1,33 +1,37 @@
-// item-templates.js
-// Contiene las plantillas de datos para crear nuevos elementos dentro de las secciones.
+
+// public/item-templates.js
+
+function generateUniqueId(prefix = 'item') {
+    return `${prefix}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+}
 
 export const itemTemplates = {
-    cards: () => ({
-        id: `card-${Date.now()}`,
-        title: "Nuevo Título de Tarjeta",
-        text: "Nuevo texto para la tarjeta."
+    cardTemplate: () => ({
+        id: generateUniqueId('card'),
+        title: "Nuevo Card",
+        text: "Descripción del nuevo card."
     }),
-    pillars: () => ({
-        id: `pillar-${Date.now()}`,
+    pillarTemplate: () => ({
+        id: generateUniqueId('pillar'),
         title: "Nuevo Pilar",
         text: "Descripción del nuevo pilar."
     }),
-    services: () => ({
-        id: `service-${Date.now()}`,
+    serviceTemplate: () => ({
+        id: generateUniqueId('service'),
         title: "Nuevo Servicio",
-        items: ["Nuevo item 1", "Nuevo item 2"]
+        items: ["Item 1", "Item 2"]
     }),
-    projects: () => ({
-        id: `project-${Date.now()}`,
-        clientLogo: "",
+    projectTemplate: () => ({
+        id: generateUniqueId('project'),
+        clientLogo: "https://placehold.co/150x50/161b22/c9d1d9?text=Logo",
         clientName: "Nuevo Cliente",
         title: "Nuevo Proyecto",
         description: "Descripción del nuevo proyecto."
     }),
-    members: () => ({
-        id: `member-${Date.now()}`,
-        photo: "",
-        name: "Nombre y Apellido",
+    memberTemplate: () => ({
+        id: generateUniqueId('member'),
+        photo: "https://placehold.co/200x200/0d1a3f/a87eff?text=?",
+        name: "Nuevo Miembro",
         role: "Cargo"
-    }),
+    })
 };
