@@ -1,0 +1,554 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e2]:
+  - generic [ref=e3]:
+    - heading "Editor Dinámico" [level=1] [ref=e4]
+    - generic [ref=e5]:
+      - group [ref=e6]:
+        - generic "Hero" [ref=e7] [cursor=pointer]
+        - generic [ref=e8]:
+          - generic [ref=e9]: mouseFollowSpeed
+          - slider [ref=e10]: "0.1"
+        - generic [ref=e11]:
+          - generic [ref=e12]: mouseWaveRadius
+          - slider [ref=e13]: "2.5"
+        - generic [ref=e14]:
+          - generic [ref=e15]: mouseWaveIntensity
+          - slider [ref=e16]: "3"
+        - generic [ref=e17]:
+          - generic [ref=e18]: colorA
+          - textbox [ref=e19]: "#a87eff"
+        - generic [ref=e20]:
+          - generic [ref=e21]: colorB
+          - textbox [ref=e22]: "#00ffff"
+        - generic [ref=e23]:
+          - generic [ref=e24]: colorInteraction
+          - textbox [ref=e25]: "#ffffff"
+        - generic [ref=e26]:
+          - generic [ref=e27]: nav_brand
+          - textbox [ref=e28]: NAVALEK
+        - generic [ref=e29]:
+          - generic [ref=e30]: hero_title
+          - textbox [ref=e31]: Título de Prueba Modificado
+        - generic [ref=e32]:
+          - generic [ref=e33]: hero_subtitle
+          - textbox [ref=e34]: Proyectos de Ingeniería y Asesorías Eléctricas
+        - generic [ref=e35]:
+          - generic [ref=e36]: hero_scroll_prompt
+          - textbox [ref=e37]: Haz scroll para activar el flujo
+        - generic [ref=e38]:
+          - generic [ref=e39]: nav_quienes_somos
+          - textbox [ref=e40]: Quiénes Somos
+        - generic [ref=e41]:
+          - generic [ref=e42]: nav_servicios
+          - textbox [ref=e43]: Servicios
+        - generic [ref=e44]:
+          - generic [ref=e45]: nav_proyectos
+          - textbox [ref=e46]: Proyectos
+        - generic [ref=e47]:
+          - generic [ref=e48]: nav_contacto
+          - textbox [ref=e49]: Contacto
+      - group [ref=e50]:
+        - generic "Identity" [ref=e51] [cursor=pointer]
+        - generic [ref=e52]:
+          - generic [ref=e53]: title
+          - textbox [ref=e54]: Nuestra Identidad
+        - generic [ref=e55]:
+          - generic [ref=e56]: subtitle
+          - textbox [ref=e57]: Los principios que guían nuestro trabajo.
+        - generic [ref=e58]:
+          - generic [ref=e59]:
+            - generic [ref=e60]: id
+            - textbox [ref=e61]: identidad_card1
+          - generic [ref=e62]:
+            - generic [ref=e63]: title
+            - textbox [ref=e64]: Quiénes Somos
+          - generic [ref=e65]:
+            - generic [ref=e66]: text
+            - textbox [ref=e67]: Somos un equipo de profesionales con una gran pasión por el servicio a nuestros clientes y a nuestra empresa. Contamos con una amplia experiencia en proyectos de ingeniería y asesorías eléctricas, estamos comprometidos con entregar un servicio de calidad y personalizado.
+        - generic [ref=e68]:
+          - generic [ref=e69]:
+            - generic [ref=e70]: id
+            - textbox [ref=e71]: identidad_card2
+          - generic [ref=e72]:
+            - generic [ref=e73]: title
+            - textbox [ref=e74]: Nuestra Misión
+          - generic [ref=e75]:
+            - generic [ref=e76]: text
+            - textbox [ref=e77]: Ofrecer soluciones integrales de ingeniería eléctrica y asesorías, que permitan a nuestros clientes mejorar la seguridad en sus instalaciones y con eficiencia energética, optimizando sus costos y contribuir al desarrollo sostenible.
+        - generic [ref=e78]:
+          - generic [ref=e79]:
+            - generic [ref=e80]: id
+            - textbox [ref=e81]: identidad_card3
+          - generic [ref=e82]:
+            - generic [ref=e83]: title
+            - textbox [ref=e84]: Nuestra Visión
+          - generic [ref=e85]:
+            - generic [ref=e86]: text
+            - textbox [ref=e87]: Ser el socio estratégico asegurando un correcto funcionamiento de las instalaciones eléctricas en el tiempo, generando que las empresas y organizaciones alcancen objetivos de sostenibilidad y eficiencia energética a través de soluciones innovadoras en proyecto de ingeniería y asesorías eléctricas, que contribuyan a un futuro más sostenible para todos.
+      - group [ref=e88]:
+        - generic "Pillars" [ref=e89] [cursor=pointer]
+        - generic [ref=e90]:
+          - generic [ref=e91]: title
+          - textbox [ref=e92]: Nuestros Pilares
+        - generic [ref=e93]:
+          - generic [ref=e94]:
+            - generic [ref=e95]: id
+            - textbox [ref=e96]: pilares_card1
+          - generic [ref=e97]:
+            - generic [ref=e98]: title
+            - textbox [ref=e99]: Excelencia Técnica
+          - generic [ref=e100]:
+            - generic [ref=e101]: text
+            - textbox [ref=e102]: La empresa tiene un equipo de profesionales altamente calificados y experimentados en las áreas de electricidad e ingeniería de proyectos. Nuestros profesionales están comprometidos con las ultimas tendencias tecnológicas y normativas.
+        - generic [ref=e103]:
+          - generic [ref=e104]:
+            - generic [ref=e105]: id
+            - textbox [ref=e106]: pilares_card2
+          - generic [ref=e107]:
+            - generic [ref=e108]: title
+            - textbox [ref=e109]: Calidad y Seguridad
+          - generic [ref=e110]:
+            - generic [ref=e111]: text
+            - textbox [ref=e112]: Nuestra empresa garantiza la calidad y seguridad de sus trabajos y servicios, cumpliendo con todas las normas y regulaciones aplicables en Chile. Esto incluye el uso de materiales y equipos de ultima tecnología, aplicando procedimientos de trabajos seguros y capacitando a nuestro personal de trabajo.
+        - generic [ref=e113]:
+          - generic [ref=e114]:
+            - generic [ref=e115]: id
+            - textbox [ref=e116]: pilares_card3
+          - generic [ref=e117]:
+            - generic [ref=e118]: title
+            - textbox [ref=e119]: Innovación y Desarrollo
+          - generic [ref=e120]:
+            - generic [ref=e121]: text
+            - textbox [ref=e122]: La empresa debe estar en constante innovación, desarrollando nuevas tecnologías y soluciones para sus clientes. Esto le permitirá mantenerse a la vanguardia del mercado y ofrecer servicios más competitivos.
+        - generic [ref=e123]:
+          - generic [ref=e124]:
+            - generic [ref=e125]: id
+            - textbox [ref=e126]: pilares_card4
+          - generic [ref=e127]:
+            - generic [ref=e128]: title
+            - textbox [ref=e129]: Responsabilidad Social
+          - generic [ref=e130]:
+            - generic [ref=e131]: text
+            - textbox [ref=e132]: Somos responsable socialmente, contribuyendo al desarrollo sostenible en la comunidad... entregando herramientas a estudiantes en practicas y a nuevos profesionales... respetando el medio ambiente y reciclando todos nuestros desechos.
+      - group [ref=e133]:
+        - generic "Services" [ref=e134] [cursor=pointer]
+        - generic [ref=e135]:
+          - generic [ref=e136]: title
+          - textbox [ref=e137]: Servicios
+        - generic [ref=e138]:
+          - generic [ref=e139]: description
+          - textbox [ref=e140]: Un portafolio completo para cubrir todas sus necesidades en ingeniería eléctrica, desde la inspección hasta la mantención.
+        - generic [ref=e141]:
+          - generic [ref=e142]:
+            - generic [ref=e143]: id
+            - textbox [ref=e144]: servicios_card1
+          - generic [ref=e145]:
+            - generic [ref=e146]: title
+            - textbox [ref=e147]: Inspecciones Técnicas
+        - generic [ref=e148]:
+          - generic [ref=e149]:
+            - generic [ref=e150]: id
+            - textbox [ref=e151]: servicios_card2
+          - generic [ref=e152]:
+            - generic [ref=e153]: title
+            - textbox [ref=e154]: Desarrollo de Proyectos
+        - generic [ref=e155]:
+          - generic [ref=e156]:
+            - generic [ref=e157]: id
+            - textbox [ref=e158]: servicios_card3
+          - generic [ref=e159]:
+            - generic [ref=e160]: title
+            - textbox [ref=e161]: Asesorías de Proyectos
+        - generic [ref=e162]:
+          - generic [ref=e163]:
+            - generic [ref=e164]: id
+            - textbox [ref=e165]: servicios_card4
+          - generic [ref=e166]:
+            - generic [ref=e167]: title
+            - textbox [ref=e168]: Sistema de Puesta a Tierra
+        - generic [ref=e169]:
+          - generic [ref=e170]:
+            - generic [ref=e171]: id
+            - textbox [ref=e172]: servicios_card5
+          - generic [ref=e173]:
+            - generic [ref=e174]: title
+            - textbox [ref=e175]: Ejecución de Proyectos
+        - generic [ref=e176]:
+          - generic [ref=e177]:
+            - generic [ref=e178]: id
+            - textbox [ref=e179]: servicios_card6
+          - generic [ref=e180]:
+            - generic [ref=e181]: title
+            - textbox [ref=e182]: Charlas y Capacitación
+        - generic [ref=e183]:
+          - generic [ref=e184]:
+            - generic [ref=e185]: id
+            - textbox [ref=e186]: servicios_card7
+          - generic [ref=e187]:
+            - generic [ref=e188]: title
+            - textbox [ref=e189]: Sistema CCTV
+        - generic [ref=e190]:
+          - generic [ref=e191]:
+            - generic [ref=e192]: id
+            - textbox [ref=e193]: servicios_card8
+          - generic [ref=e194]:
+            - generic [ref=e195]: title
+            - textbox [ref=e196]: Mantenciones
+        - generic [ref=e197]:
+          - generic [ref=e198]:
+            - generic [ref=e199]: id
+            - textbox [ref=e200]: servicios_card9
+          - generic [ref=e201]:
+            - generic [ref=e202]: title
+            - textbox [ref=e203]: Seguridad Electrónica
+      - group [ref=e204]:
+        - generic "Projects" [ref=e205] [cursor=pointer]
+        - generic [ref=e206]:
+          - generic [ref=e207]: title
+          - textbox [ref=e208]: Proyectos Ejecutados
+        - generic [ref=e209]:
+          - generic [ref=e210]:
+            - generic [ref=e211]: id
+            - textbox [ref=e212]: proyectos_card1
+          - generic [ref=e213]:
+            - generic [ref=e214]: clientLogo
+            - textbox [ref=e215]: https://storage.googleapis.com/org-gco-files-1/10700305_1720542387_corp-santiago.png
+          - generic [ref=e216]:
+            - generic [ref=e217]: clientName
+            - textbox [ref=e218]: Corporación Santiago
+          - generic [ref=e219]:
+            - generic [ref=e220]: title
+            - textbox [ref=e221]: Alumbrado Público
+          - generic [ref=e222]:
+            - generic [ref=e223]: description
+            - textbox [ref=e224]: "Asesoría y elaboración de planimetría eléctrica, levantamiento, estudio y proyección de iluminarias publicas. Simulación con DIALUX. Cliente: Corporación para el Desarrollo de Santiago."
+        - generic [ref=e225]:
+          - generic [ref=e226]:
+            - generic [ref=e227]: id
+            - textbox [ref=e228]: proyectos_card2
+          - generic [ref=e229]:
+            - generic [ref=e230]: clientLogo
+            - textbox [ref=e231]: https://storage.googleapis.com/org-gco-files-1/10700305_1720542387_interconnect.png
+          - generic [ref=e232]:
+            - generic [ref=e233]: clientName
+            - textbox [ref=e234]: Interconnect
+          - generic [ref=e235]:
+            - generic [ref=e236]: title
+            - textbox [ref=e237]: Aumento de Potencia
+          - generic [ref=e238]:
+            - generic [ref=e239]: description
+            - textbox [ref=e240]: "Levantamiento y dibujo de planimetría (obra civil y eléctrica), estudio de resistividad de suelo y asesoría para aumento de potencia de empalme MT. Cliente: Empresa INTERCONNECT, Estación Valparaíso."
+        - generic [ref=e241]:
+          - generic [ref=e242]:
+            - generic [ref=e243]: id
+            - textbox [ref=e244]: proyectos_card3
+          - generic [ref=e245]:
+            - generic [ref=e246]: clientLogo
+            - textbox [ref=e247]: https://storage.googleapis.com/org-gco-files-1/10700305_1720542387_ciquimet.png
+          - generic [ref=e248]:
+            - generic [ref=e249]: clientName
+            - textbox [ref=e250]: Ciquimet
+          - generic [ref=e251]:
+            - generic [ref=e252]: title
+            - textbox [ref=e253]: Resistividad de Suelo
+          - generic [ref=e254]:
+            - generic [ref=e255]: description
+            - textbox [ref=e256]: "Estudio para proyección de nueva malla a tierra, construcción y mejoramiento de suelo. Inspección técnica de instalación existente y diseño de planimetría. Cliente: CIQUIMET, Calama."
+        - generic [ref=e257]:
+          - generic [ref=e258]:
+            - generic [ref=e259]: id
+            - textbox [ref=e260]: proyectos_card4
+          - generic [ref=e261]:
+            - generic [ref=e262]: clientLogo
+            - textbox [ref=e263]: https://storage.googleapis.com/org-gco-files-1/10700305_1720542387_besalco.png
+          - generic [ref=e264]:
+            - generic [ref=e265]: clientName
+            - textbox [ref=e266]: Besalco
+          - generic [ref=e267]:
+            - generic [ref=e268]: title
+            - textbox [ref=e269]: Inspección y Normalización
+          - generic [ref=e270]:
+            - generic [ref=e271]: description
+            - textbox [ref=e272]: "Inspección técnica de tableros eléctricos. Revisión e inspección de puesta a tierra. Cliente: BESALCO MINERÍA, Minera Centinela, Sierra Gorda."
+        - generic [ref=e273]:
+          - generic [ref=e274]:
+            - generic [ref=e275]: id
+            - textbox [ref=e276]: proyectos_card5
+          - generic [ref=e277]:
+            - generic [ref=e278]: clientLogo
+            - textbox [ref=e279]: https://storage.googleapis.com/org-gco-files-1/10700305_1720542387_tcc.png
+          - generic [ref=e280]:
+            - generic [ref=e281]: clientName
+            - textbox [ref=e282]: TCC
+          - generic [ref=e283]:
+            - generic [ref=e284]: title
+            - textbox [ref=e285]: Cursos de Capacitación
+          - generic [ref=e286]:
+            - generic [ref=e287]: description
+            - textbox [ref=e288]: "Elaboración de cursos de AutoCAD, Ms Office, Impresión 3D, Preparación Licencia SEC Clase B, y Elaboración de Proyecto antes la SEC. Clientes: TECHNOLOGY COLLEGE CHILE y MEKOTEK."
+      - group [ref=e289]:
+        - generic "Team" [ref=e290] [cursor=pointer]
+        - generic [ref=e291]:
+          - generic [ref=e292]: title
+          - textbox [ref=e293]: Conoce a Nuestro Equipo
+        - generic [ref=e294]:
+          - generic [ref=e295]:
+            - generic [ref=e296]: id
+            - textbox [ref=e297]: equipo_miembro1
+          - generic [ref=e298]:
+            - generic [ref=e299]: photo
+            - textbox [ref=e300]: https://placehold.co/200x200/0d1a3f/a87eff?text=P.A.
+          - generic [ref=e301]:
+            - generic [ref=e302]: name
+            - textbox [ref=e303]: Patricia Aros
+          - generic [ref=e304]:
+            - generic [ref=e305]: role
+            - textbox [ref=e306]: Gerenta General
+        - generic [ref=e307]:
+          - generic [ref=e308]:
+            - generic [ref=e309]: id
+            - textbox [ref=e310]: equipo_miembro2
+          - generic [ref=e311]:
+            - generic [ref=e312]: photo
+            - textbox [ref=e313]: https://placehold.co/200x200/0d1a3f/a87eff?text=P.N.
+          - generic [ref=e314]:
+            - generic [ref=e315]: name
+            - textbox [ref=e316]: Pablo Navarro
+          - generic [ref=e317]:
+            - generic [ref=e318]: role
+            - textbox [ref=e319]: Encargado de Proyecto
+        - generic [ref=e320]:
+          - generic [ref=e321]:
+            - generic [ref=e322]: id
+            - textbox [ref=e323]: equipo_miembro3
+          - generic [ref=e324]:
+            - generic [ref=e325]: photo
+            - textbox [ref=e326]: https://placehold.co/200x200/0d1a3f/a87eff?text=D.C.
+          - generic [ref=e327]:
+            - generic [ref=e328]: name
+            - textbox [ref=e329]: Dario Carvajal
+          - generic [ref=e330]:
+            - generic [ref=e331]: role
+            - textbox [ref=e332]: Ingeniero Proyectista
+      - group [ref=e333]:
+        - generic "Footer" [ref=e334] [cursor=pointer]
+        - generic [ref=e335]:
+          - generic [ref=e336]: brandName
+          - textbox [ref=e337]: NAVALEK SPA
+        - generic [ref=e338]:
+          - generic [ref=e339]: rut
+          - textbox [ref=e340]: 77.555.114-3
+        - generic [ref=e341]:
+          - generic [ref=e342]: legalRep
+          - textbox [ref=e343]: Patricia Aros O.
+        - generic [ref=e344]:
+          - generic [ref=e345]: legalRepRut
+          - textbox [ref=e346]: 16.820.694-1
+        - generic [ref=e347]:
+          - generic [ref=e348]: contactTitle
+          - textbox [ref=e349]: Contacto
+        - generic [ref=e350]:
+          - generic [ref=e351]: email
+          - textbox [ref=e352]: Contactonavalek@gmail.com
+        - generic [ref=e353]:
+          - generic [ref=e354]: phone
+          - textbox [ref=e355]: "+56956202155"
+        - generic [ref=e356]:
+          - generic [ref=e357]: locationTitle
+          - textbox [ref=e358]: Ubicación
+        - generic [ref=e359]:
+          - generic [ref=e360]: address
+          - textbox [ref=e361]: "Av. Libertad #269, of 904, Viña del Mar"
+    - generic [ref=e362]:
+      - button "Restaurar Todo" [ref=e363] [cursor=pointer]
+      - button "Guardar Cambios" [active] [ref=e364] [cursor=pointer]
+  - iframe [ref=e366]:
+    - generic [ref=f1e3]:
+      - navigation [ref=f1e4]:
+        - generic [ref=f1e6]:
+          - link "NAVALEK" [ref=f1e7] [cursor=pointer]:
+            - /url: "#"
+          - generic [ref=f1e8]:
+            - link "Quiénes Somos" [ref=f1e9] [cursor=pointer]:
+              - /url: "#quienes-somos"
+            - link "Servicios" [ref=f1e10] [cursor=pointer]:
+              - /url: "#servicios"
+            - link "Proyectos" [ref=f1e11] [cursor=pointer]:
+              - /url: "#proyectos"
+            - link "Contacto" [ref=f1e12] [cursor=pointer]:
+              - /url: "#contacto"
+      - banner [ref=f1e13]:
+        - heading "Título de Prueba Modificado" [level=1] [ref=f1e14]
+        - paragraph [ref=f1e15]: Proyectos de Ingeniería y Asesorías Eléctricas
+        - paragraph [ref=f1e16]: Haz scroll para activar el flujo
+      - main [ref=f1e17]:
+        - generic [ref=f1e18]:
+          - generic [ref=f1e19]:
+            - heading "Nuestra Identidad" [level=2] [ref=f1e20]
+            - paragraph [ref=f1e21]: Los principios que guían nuestro trabajo.
+          - generic [ref=f1e22]:
+            - generic [ref=f1e23]:
+              - heading "Quiénes Somos" [level=3] [ref=f1e24]
+              - paragraph [ref=f1e25]: Somos un equipo de profesionales con una gran pasión por el servicio a nuestros clientes y a nuestra empresa. Contamos con una amplia experiencia en proyectos de ingeniería y asesorías eléctricas, estamos comprometidos con entregar un servicio de calidad y personalizado.
+            - generic [ref=f1e26]:
+              - heading "Nuestra Misión" [level=3] [ref=f1e27]
+              - paragraph [ref=f1e28]: Ofrecer soluciones integrales de ingeniería eléctrica y asesorías, que permitan a nuestros clientes mejorar la seguridad en sus instalaciones y con eficiencia energética, optimizando sus costos y contribuir al desarrollo sostenible.
+            - generic [ref=f1e29]:
+              - heading "Nuestra Visión" [level=3] [ref=f1e30]
+              - paragraph [ref=f1e31]: Ser el socio estratégico asegurando un correcto funcionamiento de las instalaciones eléctricas en el tiempo, generando que las empresas y organizaciones alcancen objetivos de sostenibilidad y eficiencia energética a través de soluciones innovadoras en proyecto de ingeniería y asesorías eléctricas, que contribuyan a un futuro más sostenible para todos.
+        - generic [ref=f1e32]:
+          - heading "Nuestros Pilares" [level=2] [ref=f1e33]
+          - generic [ref=f1e34]:
+            - generic [ref=f1e35]:
+              - heading "Excelencia Técnica" [level=3] [ref=f1e36]
+              - paragraph [ref=f1e37]: La empresa tiene un equipo de profesionales altamente calificados y experimentados en las áreas de electricidad e ingeniería de proyectos. Nuestros profesionales están comprometidos con las ultimas tendencias tecnológicas y normativas.
+            - generic [ref=f1e38]:
+              - heading "Calidad y Seguridad" [level=3] [ref=f1e39]
+              - paragraph [ref=f1e40]: Nuestra empresa garantiza la calidad y seguridad de sus trabajos y servicios, cumpliendo con todas las normas y regulaciones aplicables en Chile. Esto incluye el uso de materiales y equipos de ultima tecnología, aplicando procedimientos de trabajos seguros y capacitando a nuestro personal de trabajo.
+            - generic [ref=f1e41]:
+              - heading "Innovación y Desarrollo" [level=3] [ref=f1e42]
+              - paragraph [ref=f1e43]: La empresa debe estar en constante innovación, desarrollando nuevas tecnologías y soluciones para sus clientes. Esto le permitirá mantenerse a la vanguardia del mercado y ofrecer servicios más competitivos.
+            - generic [ref=f1e44]:
+              - heading "Responsabilidad Social" [level=3] [ref=f1e45]
+              - paragraph [ref=f1e46]: Somos responsable socialmente, contribuyendo al desarrollo sostenible en la comunidad... entregando herramientas a estudiantes en practicas y a nuevos profesionales... respetando el medio ambiente y reciclando todos nuestros desechos.
+        - generic [ref=f1e47]:
+          - generic [ref=f1e48]:
+            - heading "Servicios" [level=2] [ref=f1e49]
+            - paragraph [ref=f1e50]: Un portafolio completo para cubrir todas sus necesidades en ingeniería eléctrica, desde la inspección hasta la mantención.
+          - generic [ref=f1e51]:
+            - generic [ref=f1e52]:
+              - img "Inspecciones Técnicas" [ref=f1e53]
+              - generic [ref=f1e54]:
+                - heading "Inspecciones Técnicas" [level=3] [ref=f1e55]
+                - list [ref=f1e56]:
+                  - listitem [ref=f1e57]: Inspección visual de instalaciones eléctricas
+                  - listitem [ref=f1e58]: Termografías
+                  - listitem [ref=f1e59]: Mediciones
+                  - listitem [ref=f1e60]: Elaboración de informes con evidencia fotográfica
+            - generic [ref=f1e61]:
+              - img "Desarrollo de Proyectos" [ref=f1e62]
+              - generic [ref=f1e63]:
+                - heading "Desarrollo de Proyectos" [level=3] [ref=f1e64]
+                - list [ref=f1e65]:
+                  - listitem [ref=f1e66]: Creación de planimetría eléctrica
+                  - listitem [ref=f1e67]: Especificaciones técnicas
+                  - listitem [ref=f1e68]: Memorias de cálculos
+                  - listitem [ref=f1e69]: Trabajo personalizado
+            - generic [ref=f1e70]:
+              - img "Asesorías de Proyectos" [ref=f1e71]
+              - generic [ref=f1e72]:
+                - heading "Asesorías de Proyectos" [level=3] [ref=f1e73]
+                - list [ref=f1e74]:
+                  - listitem [ref=f1e75]: Auditoría
+                  - listitem [ref=f1e76]: Planificación de proyecto
+                  - listitem [ref=f1e77]: Diseño de planimetría
+                  - listitem [ref=f1e78]: Inspecciones técnicas (Normativas)
+                  - listitem [ref=f1e79]: Estudio de corto circuito
+            - generic [ref=f1e80]:
+              - img "Sistema de Puesta a Tierra" [ref=f1e81]
+              - generic [ref=f1e82]:
+                - heading "Sistema de Puesta a Tierra" [level=3] [ref=f1e83]
+                - list [ref=f1e84]:
+                  - listitem [ref=f1e85]: Estudio de resistividad de suelo
+                  - listitem [ref=f1e86]: Mediciones de sistema
+                  - listitem [ref=f1e87]: Proyección de sistema
+                  - listitem [ref=f1e88]: Fabricación de puesta a tierra
+            - generic [ref=f1e89]:
+              - img "Ejecución de Proyectos" [ref=f1e90]
+              - generic [ref=f1e91]:
+                - heading "Ejecución de Proyectos" [level=3] [ref=f1e92]
+                - list [ref=f1e93]:
+                  - listitem [ref=f1e94]: Fabricación de tableros eléctrico
+                  - listitem [ref=f1e95]: Instalación de luminarias
+                  - listitem [ref=f1e96]: Empalmes eléctricos
+                  - listitem [ref=f1e97]: Canalización subterráneo
+                  - listitem [ref=f1e98]: Declaraciones ante la SEC
+            - generic [ref=f1e99]:
+              - img "Charlas y Capacitación" [ref=f1e100]
+              - generic [ref=f1e101]:
+                - heading "Charlas y Capacitación" [level=3] [ref=f1e102]
+                - list [ref=f1e103]:
+                  - listitem [ref=f1e104]: Charlas técnicas
+                  - listitem [ref=f1e105]: Capacitación en planimetría
+                  - listitem [ref=f1e106]: Capacitación en sistema eléctrico
+                  - listitem [ref=f1e107]: Capacitación en tablero eléctrico y empalmes
+            - generic [ref=f1e108]:
+              - img "Sistema CCTV" [ref=f1e109]
+              - generic [ref=f1e110]:
+                - heading "Sistema CCTV" [level=3] [ref=f1e111]
+                - list [ref=f1e112]:
+                  - listitem [ref=f1e113]: Instalación
+                  - listitem [ref=f1e114]: Mantención
+                  - listitem [ref=f1e115]: Reparación de cámara de seguridad
+            - generic [ref=f1e116]:
+              - img "Mantenciones" [ref=f1e117]
+              - generic [ref=f1e118]:
+                - heading "Mantenciones" [level=3] [ref=f1e119]
+                - list [ref=f1e120]:
+                  - listitem [ref=f1e121]: Mantenciones de tablero eléctrico
+                  - listitem [ref=f1e122]: Mantenciones de central de telefonía
+                  - listitem [ref=f1e123]: Mantenciones de motores eléctrico
+                  - listitem [ref=f1e124]: Mantenciones generales eléctricas
+            - generic [ref=f1e125]:
+              - img "Seguridad Electrónica" [ref=f1e126]
+              - generic [ref=f1e127]:
+                - heading "Seguridad Electrónica" [level=3] [ref=f1e128]
+                - list [ref=f1e129]:
+                  - listitem [ref=f1e130]: Sistema de control de acceso
+                  - listitem [ref=f1e131]: Detección de intruso
+                  - listitem [ref=f1e132]: Sistema de detección de incendio
+                  - listitem [ref=f1e133]: Actualización de sistemas de alarmas
+        - generic [ref=f1e134]:
+          - heading "Proyectos Ejecutados" [level=2] [ref=f1e135]
+          - generic [ref=f1e136]:
+            - generic [ref=f1e137]:
+              - img "Logo Corporación Santiago" [ref=f1e138]
+              - heading "Alumbrado Público" [level=3] [ref=f1e139]
+              - paragraph [ref=f1e140]: "Asesoría y elaboración de planimetría eléctrica, levantamiento, estudio y proyección de iluminarias publicas. Simulación con DIALUX. Cliente: Corporación para el Desarrollo de Santiago."
+            - generic [ref=f1e141]:
+              - img "Logo Interconnect" [ref=f1e142]
+              - heading "Aumento de Potencia" [level=3] [ref=f1e143]
+              - paragraph [ref=f1e144]: "Levantamiento y dibujo de planimetría (obra civil y eléctrica), estudio de resistividad de suelo y asesoría para aumento de potencia de empalme MT. Cliente: Empresa INTERCONNECT, Estación Valparaíso."
+            - generic [ref=f1e145]:
+              - img "Logo Ciquimet" [ref=f1e146]
+              - heading "Resistividad de Suelo" [level=3] [ref=f1e147]
+              - paragraph [ref=f1e148]: "Estudio para proyección de nueva malla a tierra, construcción y mejoramiento de suelo. Inspección técnica de instalación existente y diseño de planimetría. Cliente: CIQUIMET, Calama."
+            - generic [ref=f1e149]:
+              - img "Logo Besalco" [ref=f1e150]
+              - heading "Inspección y Normalización" [level=3] [ref=f1e151]
+              - paragraph [ref=f1e152]: "Inspección técnica de tableros eléctricos. Revisión e inspección de puesta a tierra. Cliente: BESALCO MINERÍA, Minera Centinela, Sierra Gorda."
+            - generic [ref=f1e153]:
+              - img "Logo TCC" [ref=f1e154]
+              - heading "Cursos de Capacitación" [level=3] [ref=f1e155]
+              - paragraph [ref=f1e156]: "Elaboración de cursos de AutoCAD, Ms Office, Impresión 3D, Preparación Licencia SEC Clase B, y Elaboración de Proyecto antes la SEC. Clientes: TECHNOLOGY COLLEGE CHILE y MEKOTEK."
+        - generic [ref=f1e157]:
+          - heading "Conoce a Nuestro Equipo" [level=2] [ref=f1e158]
+          - generic [ref=f1e159]:
+            - generic [ref=f1e160]:
+              - img "Foto de Patricia Aros" [ref=f1e161]
+              - heading "Patricia Aros" [level=3] [ref=f1e162]
+              - paragraph [ref=f1e163]: Gerenta General
+            - generic [ref=f1e164]:
+              - img "Foto de Pablo Navarro" [ref=f1e165]
+              - heading "Pablo Navarro" [level=3] [ref=f1e166]
+              - paragraph [ref=f1e167]: Encargado de Proyecto
+            - generic [ref=f1e168]:
+              - img "Foto de Dario Carvajal" [ref=f1e169]
+              - heading "Dario Carvajal" [level=3] [ref=f1e170]
+              - paragraph [ref=f1e171]: Ingeniero Proyectista
+        - generic [ref=f1e173]:
+          - generic [ref=f1e174]:
+            - heading "NAVALEK SPA" [level=3] [ref=f1e175]
+            - paragraph [ref=f1e176]: "RUT: 77.555.114-3"
+            - paragraph [ref=f1e177]: "Representante Legal: Patricia Aros O."
+            - paragraph [ref=f1e178]: "RUT: 16.820.694-1"
+          - generic [ref=f1e179]:
+            - heading "Contacto" [level=4] [ref=f1e180]
+            - paragraph [ref=f1e181]: Contactonavalek@gmail.com
+            - paragraph [ref=f1e182]: "+56956202155"
+          - generic [ref=f1e183]:
+            - heading "Ubicación" [level=4] [ref=f1e184]
+            - paragraph [ref=f1e185]: "Av. Libertad #269, of 904, Viña del Mar"
+```
