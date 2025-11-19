@@ -1,0 +1,6 @@
+
+> 00000@1.0.0 start
+> node server.js
+
+Servidor iniciado en http://localhost:3000
+Terminated

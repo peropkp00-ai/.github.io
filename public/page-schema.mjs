@@ -5,7 +5,6 @@ export const pageSchema = [
     {
         type: 'hero',
         id: 'hero',
-        // El espaciado del héroe es manejado por CSS especial, no se añade aquí.
         content: {
             // --- Animación ---
             mouseFollowSpeed: 0.1,
@@ -29,11 +28,9 @@ export const pageSchema = [
     {
         type: 'identity',
         id: 'quienes-somos',
-        spacing: { pt: '16', pb: '16', pl: '4', pr: '4' },
         content: {
             title: "Nuestra Identidad",
             subtitle: "Los principios que guían nuestro trabajo.",
-            gridCols: 3,
             cards: [
                 { id: "identidad_card1", title: "Quiénes Somos", text: "Somos un equipo de profesionales con una gran pasión por el servicio a nuestros clientes y a nuestra empresa. Contamos con una amplia experiencia en proyectos de ingeniería y asesorías eléctricas, estamos comprometidos con entregar un servicio de calidad y personalizado." },
                 { id: "identidad_card2", title: "Nuestra Misión", text: "Ofrecer soluciones integrales de ingeniería eléctrica y asesorías, que permitan a nuestros clientes mejorar la seguridad en sus instalaciones y con eficiencia energética, optimizando sus costos y contribuir al desarrollo sostenible." },
@@ -44,10 +41,8 @@ export const pageSchema = [
     {
         type: 'pillars',
         id: 'pilares',
-        spacing: { pt: '16', pb: '16', pl: '4', pr: '4' },
         content: {
             title: "Nuestros Pilares",
-            gridCols: 4,
             pillars: [
                 { id: "pilares_card1", title: "Excelencia Técnica", text: "La empresa tiene un equipo de profesionales altamente calificados y experimentados en las áreas de electricidad e ingeniería de proyectos. Nuestros profesionales están comprometidos con las ultimas tendencias tecnológicas y normativas." },
                 { id: "pilares_card2", title: "Calidad y Seguridad", text: "Nuestra empresa garantiza la calidad y seguridad de sus trabajos y servicios, cumpliendo con todas las normas y regulaciones aplicables en Chile. Esto incluye el uso de materiales y equipos de ultima tecnología, aplicando procedimientos de trabajos seguros y capacitando a nuestro personal de trabajo." },
@@ -59,11 +54,9 @@ export const pageSchema = [
     {
         type: 'services',
         id: 'servicios',
-        spacing: { pt: '16', pb: '16', pl: '4', pr: '4' },
         content: {
             title: "Servicios",
             description: "Un portafolio completo para cubrir todas sus necesidades en ingeniería eléctrica, desde la inspección hasta la mantención.",
-            gridCols: 3,
             services: [
                 { id: "servicios_card1", title: "Inspecciones Técnicas", items: ["Inspección visual de instalaciones eléctricas", "Termografías", "Mediciones", "Elaboración de informes con evidencia fotográfica"] },
                 { id: "servicios_card2", title: "Desarrollo de Proyectos", items: ["Creación de planimetría eléctrica", "Especificaciones técnicas", "Memorias de cálculos", "Trabajo personalizado"] },
@@ -80,10 +73,8 @@ export const pageSchema = [
     {
         type: 'projects',
         id: 'proyectos',
-        spacing: { pt: '16', pb: '16', pl: '4', pr: '4' },
         content: {
             title: "Proyectos Ejecutados",
-            gridCols: 2,
             projects: [
                 { id: "proyectos_card1", clientLogo: "https://storage.googleapis.com/org-gco-files-1/10700305_1720542387_corp-santiago.png", clientName: "Corporación Santiago", title: "Alumbrado Público", description: "Asesoría y elaboración de planimetría eléctrica, levantamiento, estudio y proyección de iluminarias publicas. Simulación con DIALUX. Cliente: Corporación para el Desarrollo de Santiago." },
                 { id: "proyectos_card2", clientLogo: "https://storage.googleapis.com/org-gco-files-1/10700305_1720542387_interconnect.png", clientName: "Interconnect", title: "Aumento de Potencia", description: "Levantamiento y dibujo de planimetría (obra civil y eléctrica), estudio de resistividad de suelo y asesoría para aumento de potencia de empalme MT. Cliente: Empresa INTERCONNECT, Estación Valparaíso." },
@@ -96,10 +87,8 @@ export const pageSchema = [
     {
         type: 'team',
         id: 'equipo',
-        spacing: { pt: '16', pb: '16', pl: '4', pr: '4' },
         content: {
             title: "Conoce a Nuestro Equipo",
-            gridCols: 3,
             members: [
                 { id: "equipo_miembro1", photo: "https://placehold.co/200x200/0d1a3f/a87eff?text=P.A.", name: "Patricia Aros", role: "Gerenta General" },
                 { id: "equipo_miembro2", photo: "https://placehold.co/200x200/0d1a3f/a87eff?text=P.N.", name: "Pablo Navarro", role: "Encargado de Proyecto" },
@@ -110,7 +99,6 @@ export const pageSchema = [
     {
         type: 'footer',
         id: 'contacto',
-        spacing: { pt: '16', pb: '16', pl: '4', pr: '4' },
         content: {
             brandName: "NAVALEK SPA",
             rut: "77.555.114-3",
