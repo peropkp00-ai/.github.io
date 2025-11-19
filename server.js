@@ -5,12 +5,12 @@ const path = require('path');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Servir archivos estáticos desde el directorio 'public'
-app.use(express.static(path.join(__dirname, 'public')));
+// Servir archivos estáticos desde el directorio 'public_restored'
+app.use(express.static(path.join(__dirname, 'public_restored')));
 
 // Ruta principal para servir index.html (opcional, express.static ya lo hace por defecto)
 app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+    res.sendFile(path.join(__dirname, 'public_restored', 'index.html'));
 });
 
 // Iniciar el servidor

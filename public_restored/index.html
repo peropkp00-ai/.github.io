@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="es" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NAVALEK SPA - Proyectos de Ingeniería Eléctrica</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700;900&display=swap" rel="stylesheet">
+
+    <script async src="https://unpkg.com/es-module-shims@1.6.3/dist/es-module-shims.js"></script>
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://cdn.jsdelivr.net/npm/three@0.140.0/build/three.module.js"
+            }
+        }
+    </script>
+
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #0d1a3f; color: #f3f4f6; }
+        #webgl-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100vh; z-index: 0; }
+        .scroll-content { position: relative; z-index: 10; color: white; padding-top: 100vh; }
+        .hero-section { height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; position: relative; z-index: 5; padding: 1rem; }
+        .glass-card { background: rgba(13, 26, 63, 0.6); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border: 1px solid rgba(168, 126, 255, 0.1); }
+        .hexagon-clip { clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%); }
+    </style>
+</head>
+<body class="antialiased">
+
+    <canvas id="webgl-canvas"></canvas>
+
+    <div id="app-container">
+        <!-- El contenido de la página se renderizará aquí dinámicamente -->
+    </div>
+
+    <!-- Script de Renderizado y Carga de Esquema -->
+    <script type="module">
+        import { pageSchema as defaultSchema } from './page-schema.mjs';
+        import { renderPage } from './renderer.js';
+        import * as THREE from 'three';
+
+        let currentSchema;
+
+        // Cargar el esquema desde localStorage o usar el predeterminado
+        try {
+            const savedSchema = localStorage.getItem('userPageSchema');
+            currentSchema = savedSchema ? JSON.parse(savedSchema) : defaultSchema;
+        } catch (e) {
+            console.error("Error al cargar el esquema, usando el predeterminado.", e);
+            currentSchema = defaultSchema;
+        }
+
+        // Renderizar la página con el esquema cargado
+        document.addEventListener('DOMContentLoaded', () => {
+            const container = document.getElementById('app-container');
+            if (container) {
+                renderPage(currentSchema, container);
+            }
+        });
+
+        // --- API de Actualización en Vivo ---
+        window.liveUpdater = {
+            updateText: (elementId, newText) => {
+                const element = document.getElementById(elementId);
+                if (element) {
+                    if (element.tagName === 'UL') {
+                        element.innerHTML = newText.split('\n').map(item => `<li>${item}</li>`).join('');
+                    } else {
+                        element.textContent = newText;
+                    }
+                }
+            },
+            updateAnimation: (key, value) => {
+                if (material.uniforms[key]) {
+                    if (key.toLowerCase().includes('color')) {
+                        material.uniforms[key].value.set(value);
+                    } else {
+                        material.uniforms[key].value = value;
+                    }
+                }
+                if (key === 'mouseFollowSpeed') {
+                    settings.mouseFollowSpeed = value;
+                }
+            }
+        };
+
+        // --- Lógica del WebGL y Animaciones ---
+        const heroSection = currentSchema.find(s => s.type === 'hero');
+        const settings = heroSection ? heroSection.content : {};
+
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 100);
+        camera.position.set(0, 0, 10);
+
+        const renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('webgl-canvas'), alpha: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+        const planeSize = 50;
+        const planeSegments = 50;
+        const geometry = new THREE.PlaneGeometry(planeSize, planeSize, planeSegments, planeSegments);
+
+        const colorA = new THREE.Color(settings.colorA);
+        const colorB = new THREE.Color(settings.colorB);
+        const colorInteraction = new THREE.Color(settings.colorInteraction);
+
+        const material = new THREE.ShaderMaterial({
+            uniforms: {
+                u_time: { value: 0.0 },
+                u_scroll: { value: 0.0 },
+                u_mouse: { value: new THREE.Vector2(0, 0) },
+                u_color_a: { value: colorA },
+                u_color_b: { value: colorB },
+                u_color_interaction: { value: colorInteraction },
+                u_mouse_wave_radius: { value: settings.mouseWaveRadius },
+                u_mouse_wave_intensity: { value: settings.mouseWaveIntensity }
+            },
+            vertexShader: `
+                uniform float u_time, u_scroll, u_mouse_wave_radius, u_mouse_wave_intensity;
+                uniform vec2 u_mouse;
+                varying float v_wave, v_mouse_wave;
+                vec3 mod289(vec3 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
+                vec2 mod289(vec2 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
+                vec3 permute(vec3 x) { return mod289(((x*34.0)+1.0)*x); }
+                float snoise(vec2 v) {
+                    const vec4 C = vec4(0.211324865405187, 0.366025403784439, -0.577350269189626, 0.024390243902439);
+                    vec2 i  = floor(v + dot(v, C.yy) );
+                    vec2 x0 = v -   i + dot(i, C.xx);
+                    vec2 i1 = (x0.x > x0.y) ? vec2(1.0, 0.0) : vec2(0.0, 1.0);
+                    vec4 x12 = x0.xyxy + C.xxzz;
+                    x12.xy -= i1;
+                    i = mod289(i);
+                    vec3 p = permute( permute( i.y + vec3(0.0, i1.y, 1.0 )) + i.x + vec3(0.0, i1.x, 1.0 ));
+                    vec3 m = max(0.5 - vec3(dot(x0,x0), dot(x12.xy,x12.xy), dot(x12.zw,x12.zw)), 0.0);
+                    m = m*m; m = m*m;
+                    vec3 x = 2.0 * fract(p * C.www) - 1.0;
+                    vec3 h = abs(x) - 0.5;
+                    vec3 ox = floor(x + 0.5);
+                    vec3 a0 = x - ox;
+                    m *= (1.79284291400159 - 0.85373472077480 * ( a0*a0 + h*h ));
+                    vec3 g;
+                    g.x  = a0.x  * x0.x  + h.x  * x0.y;
+                    g.yz = a0.yz * x12.xz + h.yz * x12.yw;
+                    return 130.0 * dot(m, g);
+                }
+                void main() {
+                    vec3 pos = position;
+                    float scrollWave = 1.0 - smoothstep(0.0, 0.5, abs(pos.y * 0.1 + u_scroll));
+                    float noise = snoise(vec2(pos.x * 0.1 + u_time * 0.1, pos.y * 0.1 + u_time * 0.1));
+                    float dist = distance(pos.xy, u_mouse);
+                    float mouseWave = 1.0 - smoothstep(0.0, u_mouse_wave_radius, dist);
+                    pos.z += (scrollWave * 2.0) + (noise * 0.2) + (mouseWave * u_mouse_wave_intensity);
+                    v_wave = scrollWave;
+                    v_mouse_wave = mouseWave;
+                    gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);
+                }
+            `,
+            fragmentShader: `
+                uniform vec3 u_color_a, u_color_b, u_color_interaction;
+                varying float v_wave, v_mouse_wave;
+                void main() {
+                    vec3 scrollColor = mix(u_color_a, u_color_b, v_wave);
+                    vec3 finalColor = mix(scrollColor, u_color_interaction, v_mouse_wave);
+                    gl_FragColor = vec4(finalColor, 1.0);
+                }
+            `,
+            wireframe: true,
+            transparent: true,
+            opacity: 0.5
+        });
+
+        const circuit = new THREE.Mesh(geometry, material);
+        circuit.rotation.x = -0.3;
+        scene.add(circuit);
+
+        const lerp = (a, b, t) => (1 - t) * a + t * b;
+        let scrollY = window.scrollY;
+        let currentScroll = window.scrollY;
+        window.addEventListener('scroll', () => { scrollY = window.scrollY; });
+
+        const mouse = new THREE.Vector2(0, 0);
+        const targetMouse = new THREE.Vector2(0, 0);
+        window.addEventListener('mousemove', (event) => {
+            mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+            mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+        });
+
+        const clock = new THREE.Clock();
+        function animate() {
+            requestAnimationFrame(animate);
+            const elapsedTime = clock.getElapsedTime();
+            currentScroll = lerp(currentScroll, scrollY, 0.05);
+            const scrollableHeight = document.body.scrollHeight - window.innerHeight;
+            const scrollProgress = scrollableHeight > 0 ? currentScroll / scrollableHeight : 0;
+            targetMouse.lerp(mouse, settings.mouseFollowSpeed);
+            const vFOV = THREE.MathUtils.degToRad(camera.fov);
+            const height = 2 * Math.tan(vFOV / 2) * camera.position.z;
+            const width = height * camera.aspect;
+            const mouse3D_x = targetMouse.x * (width / 2);
+            const mouse3D_y = targetMouse.y * (height / 2);
+            material.uniforms.u_scroll.value = lerp(2.5, -2.5, scrollProgress);
+            material.uniforms.u_time.value = elapsedTime;
+            material.uniforms.u_mouse.value.set(mouse3D_x, mouse3D_y);
+            camera.position.x = Math.sin(elapsedTime * 0.1) * 0.5;
+            camera.lookAt(0, 0, 0);
+            renderer.render(scene, camera);
+        }
+        animate();
+
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        }
+        window.addEventListener('resize', onWindowResize);
+    </script>
+</body>
+</html>
